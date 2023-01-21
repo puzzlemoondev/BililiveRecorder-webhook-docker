@@ -6,5 +6,5 @@ services:
     volumes:
       - ./rec:/rec
     command: [
-      "run", "--bind", "https://*:2356", "/rec"
+      "run", "--bind", "http://*:2356", "/rec"
     ]
