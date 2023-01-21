@@ -1,0 +1,23 @@
+[
+  {
+    "id": "recorder-file-closed",
+    "execute-command": "/etc/webhook/on-recorder-file-closed.sh",
+    "command-working-directory": "/rec",
+    "pass-arguments-to-command": [
+      {
+        "source": "payload",
+        "name": "EventData.RelativePath"
+      }
+    ],
+    "trigger-rule": {
+      "match": {
+        "type": "value",
+        "value": "FileClosed",
+        "parameter": {
+          "source": "payload",
+          "name": "EventType"
+        }
+      }
+    }
+  }
+]
