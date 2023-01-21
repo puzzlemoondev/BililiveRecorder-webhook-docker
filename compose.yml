@@ -6,5 +6,12 @@ services:
     volumes:
       - ./rec:/rec
     command: [
-      "run", "--bind", "http://*:2356", "/rec"
+      "run", 
+      "--bind", 
+      "http://*:2356", 
+      "--http-basic-user", 
+      "${RECORDER_USER}", 
+      "--http-basic-pass",
+      "${RECORDER_PASS}",
+      "/rec"
     ]
