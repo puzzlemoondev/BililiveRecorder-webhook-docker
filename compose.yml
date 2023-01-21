@@ -1,0 +1,10 @@
+services:
+  recorder:
+    image: bililive/recorder
+    ports:
+      - "2356:2356"
+    volumes:
+      - ./rec:/rec
+    command: [
+      "run", "--bind", "https://*:2356", "/rec"
+    ]
