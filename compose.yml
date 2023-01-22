@@ -8,6 +8,7 @@ services:
       - recorder_network
     volumes:
       - ./rec:/rec
+    restart: always
     command: [
       "run", 
       "--bind", 
@@ -30,6 +31,7 @@ services:
     volumes:
       - ./rec:/rec
       - ./webhook:/etc/webhook
+    restart: always
     environment:
       - BAIDUPCS_BDUSS
       - BAIDUPCS_STOKEN
