@@ -2,7 +2,7 @@
 
 Dockerized [BililiveRecorder](https://github.com/BililiveRecorder/BililiveRecorder) with [baidupcs](https://github.com/qjfoidnh/BaiduPCS-Go) upload webhook.
 
-The webhook server listens for `FileClosed` events, uploads folder containing the file to baidupcs, and removes the folder after upload success.
+The [webhook](https://github.com/adnanh/webhook) server listens for `FileClosed` events, uploads folder containing the file to baidupcs, and removes the folder after upload success.
 
 ## How to use
 
