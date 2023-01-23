@@ -15,4 +15,4 @@ if [ "$uid" = 0 ]; then
 fi
 
 echo "uploading directory $record_dir"
-baidupcs-go upload "$record_dir" . && rm -rf "$record_dir"
+baidupcs-go upload "$record_dir" / && rm -rf "$record_dir"
