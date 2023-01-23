@@ -18,6 +18,8 @@ RUN wget https://github.com/adnanh/webhook/archive/refs/tags/${WEBHOOK_VERSION}.
     go build -o /usr/local/bin/webhook
 
 FROM ubuntu AS webhook
+RUN apt-get update && \
+    apt-get install -y jq
 COPY --from=webhook-build /usr/local/bin/webhook /usr/local/bin/webhook
 COPY --from=baidupcs-go-build /usr/local/bin/baidupcs-go /usr/local/bin/baidupcs-go
 ENV PATH=/usr/local/bin:$PATH

@@ -5,8 +5,7 @@
     "command-working-directory": "/rec",
     "pass-arguments-to-command": [
       {
-        "source": "payload",
-        "name": "EventData.RelativePath"
+        "source": "entire-payload"
       }
     ],
     "trigger-rule": {

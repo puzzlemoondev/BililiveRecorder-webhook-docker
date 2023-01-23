@@ -1,8 +1,12 @@
 #!/bin/sh
 
-record_dir=$(echo "$1" | awk -F/ '{print $1}')
-echo "new record: $1"
-echo "record directory: $record_dir"
+record_file=$(echo "$1" | jq -r ".EventData.RelativePath")
+record_dir=$(dirname $record_file)
+echo "new record: $record_file"
+
+event_json_file="${record_file%.*}.json"
+echo "writing event to file $event_json_file"
+echo "$1" > $event_json_file
 
 uid=$(baidupcs-go who | cut -d ',' -f 1 | grep -oE '[0-9]+')
 if [ "$uid" = 0 ]; then
@@ -11,4 +15,4 @@ if [ "$uid" = 0 ]; then
 fi
 
 echo "uploading directory $record_dir"
-baidupcs-go upload "$record_dir" "$record_dir" && rm -rf "$record_dir"
+baidupcs-go upload "$record_dir" . && rm -rf "$record_dir"
