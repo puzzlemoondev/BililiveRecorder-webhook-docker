@@ -6,7 +6,7 @@ echo "new record: $record_file"
 
 event_json_file="${record_file%.*}.json"
 echo "writing event to file $event_json_file"
-echo "$1" > "$event_json_file"
+echo "$1" | jq > "$event_json_file"
 
 uid=$(baidupcs-go who | cut -d ',' -f 1 | grep -oE '[0-9]+')
 if [ "$uid" = 0 ]; then
