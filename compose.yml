@@ -35,6 +35,7 @@ services:
     environment:
       - BAIDUPCS_BDUSS
       - BAIDUPCS_STOKEN
+      - ALIYUNPAN_RTOKEN
     command: [
       "-verbose", 
       "-hooks=/etc/webhook/hooks.json", 
