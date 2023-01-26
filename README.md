@@ -4,6 +4,8 @@ Dockerized [BililiveRecorder](https://github.com/BililiveRecorder/BililiveRecord
 
 The [webhook](https://github.com/adnanh/webhook) server listens for `FileClosed` events, uploads folder containing the file to baidupcs, and removes the folder after upload success.
 
+[B站专栏](https://www.bilibili.com/read/cv21367565)
+
 ## How to use
 
 - Add a [`.env` file](https://docs.docker.com/compose/environment-variables/#the-env-file) with these variables. For baidupcs, provide both bduss and stoken. For aliyunpan, provide rtoken. Providing credentials for both platform at the same time triggers upload to both platform concurrently.
