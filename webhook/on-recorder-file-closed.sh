@@ -1,7 +1,5 @@
 #!/bin/sh
 
-set -eu
-
 record_file=$(echo "$1" | jq -r ".EventData.RelativePath")
 record_dir=$(dirname "$record_file")
 echo "new record: $record_file"
@@ -10,12 +8,35 @@ event_json_file="${record_file%.*}.json"
 echo "writing event to file $event_json_file"
 echo "$1" | jq > "$event_json_file"
 
+has_baidupcs=false
+if [ -n "$BAIDUPCS_BDUSS" ] && [ -n "$BAIDUPCS_STOKEN" ]; then
+    has_baidupcs=true
+fi
+
+has_aliyunpan=false
+if [ -n "$ALIYUNPAN_RTOKEN" ]; then
+    has_aliyunpan=true
+fi
+
+contain_records() {
+    output=true
+    find "$record_dir" -type f -name '*.flv' -mindepth 1 -printf '%P\n' > tmp
+    while IFS= read -r file; do
+        if [ -n "${1##*"$file"*}" ]; then
+            output=false
+            break
+        fi
+    done < tmp
+    rm tmp
+    echo "$output"
+}
+
 upload_baidupcs() {
-    if [ ! "${BAIDUPCS_BDUSS+1}" ] || [ ! "${BAIDUPCS_STOKEN+1}" ]; then
+    if [ "$has_baidupcs" = false ]; then
         exit
     fi
 
-    loglist_length=$(baidupcs-go loglist | grep . | wc -l)
+    loglist_length=$(baidupcs-go loglist | grep -c .)
     if [ "$loglist_length" -le 1 ]; then
         echo "baidupcs not logged in. attempting login..."
         baidupcs-go login -bduss="$BAIDUPCS_BDUSS" -stoken="$BAIDUPCS_STOKEN"
@@ -26,11 +47,11 @@ upload_baidupcs() {
 }
 
 upload_aliyunpan() {
-    if [ ! "${ALIYUNPAN_RTOKEN+1}" ]; then
+    if [ "$has_aliyunpan" = false ]; then
         exit
     fi
 
-    loglist_length=$(aliyunpan loglist | grep . | wc -l)
+    loglist_length=$(aliyunpan loglist | grep -c .)
     if [ "$loglist_length" -le 1 ]; then
         echo "aliyunpan not logged in. attempting login..."
         aliyunpan login -RefreshToken="$ALIYUNPAN_RTOKEN"
@@ -48,4 +69,18 @@ pid_aliyunpan=$!
 
 wait $pid_baidupcs $pid_aliyunpan
 
-rm -rf "$record_dir"
+is_baidupcs_completed=true
+if [ "$has_baidupcs" = true ]; then
+    baidupcs_content=$(baidupcs-go ls "$record_dir")
+    is_baidupcs_completed=$(contain_records "$baidupcs_content")
+fi
+
+is_aliyunpan_completed=true
+if [ "$has_aliyunpan" = true ]; then
+    aliyunpan_content=$(aliyunpan ls "$record_dir")
+    is_aliyunpan_completed=$(contain_records "$aliyunpan_content")
+fi
+
+if [ "$is_baidupcs_completed" = true ] && [ "$is_aliyunpan_completed" = true ]; then 
+    rm -rf "$record_dir"
+fi
