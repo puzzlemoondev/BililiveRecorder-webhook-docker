@@ -20,7 +20,7 @@ fi
 
 contain_records() {
     output=true
-    find "$record_dir" -type f -name '*.flv' -mindepth 1 -printf '%P\n' > tmp
+    find "$record_dir" -type f \( -iname \*.flv -o -iname \*.json \) -mindepth 1 -printf '%P\n' > tmp
     while IFS= read -r file; do
         if [ -n "${1##*"$file"*}" ]; then
             output=false
