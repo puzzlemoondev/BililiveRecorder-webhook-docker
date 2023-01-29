@@ -82,5 +82,6 @@ if [ "$has_aliyunpan" = true ]; then
 fi
 
 if [ "$is_baidupcs_completed" = true ] && [ "$is_aliyunpan_completed" = true ]; then 
+    echo "directory uploaded. removing local..."
     rm -rf "$record_dir"
 fi
