@@ -1,4 +1,5 @@
 FROM golang AS build
+ENV GOPROXY https://proxy.golang.com.cn,direct
 RUN apt-get update && \
     apt-get install -y wget
 WORKDIR /app
