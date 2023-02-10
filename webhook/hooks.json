@@ -1,9 +1,16 @@
 [
   {
     "id": "recorder-file-closed",
-    "execute-command": "/etc/webhook/on-recorder-file-closed.sh",
-    "command-working-directory": "/rec",
+    "execute-command": "poetry",
     "pass-arguments-to-command": [
+      {
+        "source": "string",
+        "name": "run"
+      },
+      {
+        "source": "string",
+        "name": "action"
+      },
       {
         "source": "entire-payload"
       }

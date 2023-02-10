@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "action"
+version = "0.1.0"
+description = ""
+authors = ["PuzzleMoon <32855965+puzzlemoondev@users.noreply.github.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+biliup = "^0.4.1"
+celery = { extras = ["redis"], version = "^5.2.7" }
+flower = "^1.2.0"
+
+[tool.poetry.scripts]
+action = "action.main:main"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

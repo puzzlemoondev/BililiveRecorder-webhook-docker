@@ -3,43 +3,83 @@ services:
     container_name: recorder
     image: bililive/recorder
     ports:
-      - "2356:2356"
+      - '2356:2356'
     networks:
       - recorder_network
     volumes:
       - ./rec:/rec
+    command:
+      [
+        'run',
+        '--bind',
+        'http://*:2356',
+        '--http-basic-user',
+        '${RECORDER_USER}',
+        '--http-basic-pass',
+        '${RECORDER_PASS}',
+        '/rec',
+      ]
     restart: always
-    command: [
-      "run", 
-      "--bind", 
-      "http://*:2356", 
-      "--http-basic-user", 
-      "${RECORDER_USER}", 
-      "--http-basic-pass",
-      "${RECORDER_PASS}",
-      "/rec"
-    ]
+    depends_on:
+      - webhook
   webhook:
     container_name: webhook
-    build: 
+    build:
       context: .
       dockerfile: webhook.Dockerfile
+      target: webhook
     ports:
-      - "9000:9000"
+      - '9000:9000'
     networks:
       - recorder_network
     volumes:
       - ./rec:/rec
       - ./webhook:/etc/webhook
+    command: ['-verbose', '-hooks=/etc/webhook/hooks.json', '-hotreload']
     restart: always
+    depends_on:
+      - worker
+  worker:
+    container_name: worker
+    build:
+      context: .
+      dockerfile: webhook.Dockerfile
+      target: worker
+    networks:
+      - recorder_network
+    volumes:
+      - ./rec:/rec
+      - ./biliup:/etc/biliup
     environment:
       - BAIDUPCS_BDUSS
       - BAIDUPCS_STOKEN
       - ALIYUNPAN_RTOKEN
-    command: [
-      "-verbose", 
-      "-hooks=/etc/webhook/hooks.json", 
-      "-hotreload"
-    ]
+    command: ['celery', '-A', 'action', 'worker', '-l', 'INFO', '-E']
+    restart: always
+    depends_on:
+      - redis
+  flower:
+    container_name: flower
+    build:
+      context: .
+      dockerfile: webhook.Dockerfile
+      target: worker
+    ports:
+      - 5555:5555
+    networks:
+      - recorder_network
+    command: ['celery', '-A', 'action', 'flower']
+    restart: always
+    depends_on:
+      - worker
+      - redis
+  redis:
+    container_name: redis
+    image: redis
+    ports:
+      - '6379:6379'
+    networks:
+      - recorder_network
+    restart: always
 networks:
   recorder_network:
