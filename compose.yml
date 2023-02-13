@@ -31,6 +31,7 @@ services:
       - recorder_network
     volumes:
       - ./rec:/rec
+      - ./action:/action
       - ./webhook:/etc/webhook
     command: ['-verbose', '-hooks=/etc/webhook/hooks.json', '-hotreload']
     restart: always
@@ -43,6 +44,7 @@ services:
       - recorder_network
     volumes:
       - ./rec:/rec
+      - ./action:/action
       - ./biliup:/etc/biliup
     environment:
       - BAIDUPCS_BDUSS
@@ -59,6 +61,8 @@ services:
       - 5555:5555
     networks:
       - recorder_network
+    volumes:
+      - ./action:/action
     command: ['celery', '-A', 'action', 'flower']
     restart: always
     depends_on:
