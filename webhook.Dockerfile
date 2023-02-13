@@ -1,6 +1,6 @@
 FROM golang:alpine AS build
 ENV GOPROXY https://proxy.golang.com.cn,direct
-RUN apk add --no-cache wget
+RUN apk add --update --no-cache wget
 WORKDIR /app
 
 FROM build AS baidupcs-go-build
@@ -24,22 +24,35 @@ RUN wget https://github.com/adnanh/webhook/archive/refs/tags/${WEBHOOK_VERSION}.
     go get -d && \
     go build -o /usr/local/bin/webhook
 
-FROM continuumio/miniconda3:master-alpine AS worker
-COPY --from=baidupcs-go-build /usr/local/bin/baidupcs-go /usr/local/bin/baidupcs-go
-COPY --from=aliyunpan-build /usr/local/bin/aliyunpan /usr/local/bin/aliyunpan
-ENV POETRY_VERSION 1.3.1
+FROM python:3.11-alpine as python-base
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=off \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
-    PIP_DEFAULT_TIMEOUT=1000 \
+    PIP_DEFAULT_TIMEOUT=100 \
     POETRY_HOME=/opt/poetry \
+    POETRY_VENV=/opt/poetry-venv \
+    POETRY_CACHE_DIR=/opt/.cache \
     POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_CREATE=false
-RUN conda install -c conda-forge gcc 'python>=3.11' poetry=${POETRY_VERSION}
+
+FROM python-base as poetry-base
+ENV POETRY_VERSION 1.3.2
+RUN apk add --update --no-cache gcc musl-dev libffi-dev && \
+    python3 -m venv $POETRY_VENV && \
+    $POETRY_VENV/bin/pip install -U pip setuptools && \
+    $POETRY_VENV/bin/pip install poetry==${POETRY_VERSION}
+WORKDIR /action
+COPY ./action/pyproject.toml .
+RUN $POETRY_VENV/bin/poetry install --no-cache --only main
+
+FROM python-base as worker
+COPY --from=baidupcs-go-build /usr/local/bin/baidupcs-go /usr/local/bin/baidupcs-go
+COPY --from=aliyunpan-build /usr/local/bin/aliyunpan /usr/local/bin/aliyunpan
+COPY --from=poetry-base ${POETRY_VENV} ${POETRY_VENV}
+ENV PATH="$PATH:$POETRY_VENV/bin"
 WORKDIR /action
 COPY ./action .
-RUN poetry install --only main
 ENTRYPOINT [ "poetry", "run" ]
 
 FROM worker AS webhook
