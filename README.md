@@ -1,5 +1,7 @@
 # BililiveRecorder-webhook-docker
 
+[![Publish](https://github.com/puzzlemoondev/BililiveRecorder-webhook-docker/actions/workflows/publish.yml/badge.svg)](https://github.com/puzzlemoondev/BililiveRecorder-webhook-docker/actions/workflows/publish.yml)
+
 Dockerized [BililiveRecorder](https://github.com/BililiveRecorder/BililiveRecorder) with biliup, baidupcs and aliyunpan upload webhook.
 
 The [webhook](https://github.com/adnanh/webhook) server listens for `FileClosed` events, uploads files, and removes them after upload success.
