@@ -1,8 +1,8 @@
 # BililiveRecorder-webhook-docker
 
-Dockerized [BililiveRecorder](https://github.com/BililiveRecorder/BililiveRecorder) with baidupcs and aliyunpan upload webhook.
+Dockerized [BililiveRecorder](https://github.com/BililiveRecorder/BililiveRecorder) with biliup, baidupcs and aliyunpan upload webhook.
 
-The [webhook](https://github.com/adnanh/webhook) server listens for `FileClosed` events, uploads folder containing the file to baidupcs, and removes the folder after upload success.
+The [webhook](https://github.com/adnanh/webhook) server listens for `FileClosed` events, uploads files, and removes them after upload success.
 
 [B 站专栏](https://www.bilibili.com/read/cv21367565)
 
