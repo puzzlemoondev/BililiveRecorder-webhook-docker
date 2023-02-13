@@ -68,6 +68,11 @@ streamers:
     dtime: 28800
 ```
 
+## Monitoring
+
+- We use [`flower`](https://github.com/mher/flower) to monitor task queues.
+- Open `localhost:5555` to see the panel.
+
 ## Dependencies
 
 - [BililiveRecorder](https://github.com/BililiveRecorder/BililiveRecorder)
