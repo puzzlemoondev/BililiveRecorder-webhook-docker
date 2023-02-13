@@ -24,10 +24,7 @@ services:
       - webhook
   webhook:
     container_name: webhook
-    build:
-      context: .
-      dockerfile: webhook.Dockerfile
-      target: webhook
+    image: puzzlemoondev/bililive-recorder-webhook
     ports:
       - '9000:9000'
     networks:
@@ -41,10 +38,7 @@ services:
       - worker
   worker:
     container_name: worker
-    build:
-      context: .
-      dockerfile: webhook.Dockerfile
-      target: worker
+    image: puzzlemoondev/bililive-recorder-webhook-worker
     networks:
       - recorder_network
     volumes:
@@ -60,10 +54,7 @@ services:
       - redis
   flower:
     container_name: flower
-    build:
-      context: .
-      dockerfile: webhook.Dockerfile
-      target: worker
+    image: puzzlemoondev/bililive-recorder-webhook-worker
     ports:
       - 5555:5555
     networks:
