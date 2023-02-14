@@ -1,5 +1,4 @@
 FROM golang:alpine AS build
-ENV GOPROXY https://proxy.golang.com.cn,direct
 RUN apk add --update --no-cache wget
 WORKDIR /app
 
