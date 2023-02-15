@@ -28,7 +28,5 @@ jobs:
           target: webhook
           push: true
           tags: puzzlemoondev/bililive-recorder-webhook:latest
-          cache-from: |
-            type=gha,scope=base
-            type=gha,scope=webhook
-          cache-to: type=gha,scope=webhook,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
