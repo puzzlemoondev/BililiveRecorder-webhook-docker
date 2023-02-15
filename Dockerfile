@@ -45,7 +45,14 @@ WORKDIR /action
 COPY ./action/pyproject.toml .
 RUN $POETRY_VENV/bin/poetry install --no-cache --only main
 
-FROM python-base as webhook
+FROM python-base as recorder
+RUN apk add --update --no-cache aspnetcore6-runtime tzdata
+ENV TZ=Asia/Shanghai
+WORKDIR /app
+COPY --from=bililive/recorder:2.6.2 /app /app
+EXPOSE 2356
+
+FROM recorder as webhook
 COPY --from=webhook-build /usr/local/bin/webhook /usr/local/bin/webhook
 COPY --from=baidupcs-go-build /usr/local/bin/baidupcs-go /usr/local/bin/baidupcs-go
 COPY --from=aliyunpan-build /usr/local/bin/aliyunpan /usr/local/bin/aliyunpan
