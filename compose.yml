@@ -24,57 +24,25 @@ services:
       - webhook
   webhook:
     container_name: webhook
+    # build:
+    #   context: .
+    #   target: webhook
     image: puzzlemoondev/bililive-recorder-webhook
     ports:
+      - '5555:5555'
       - '9000:9000'
-    networks:
-      - recorder_network
-    volumes:
-      - ./rec:/rec
-      - ./action:/action
-      - ./webhook:/etc/webhook
-    command: ['-verbose', '-hooks=/etc/webhook/hooks.json', '-hotreload']
-    restart: always
-    depends_on:
-      - worker
-  worker:
-    container_name: worker
-    image: puzzlemoondev/bililive-recorder-webhook-worker
+      - '9001:9001'
     networks:
       - recorder_network
     volumes:
       - ./rec:/rec
       - ./action:/action
       - ./biliup:/etc/biliup
+      - ./webhook:/etc/webhook
     environment:
       - BAIDUPCS_BDUSS
       - BAIDUPCS_STOKEN
       - ALIYUNPAN_RTOKEN
-    command: ['celery', '-A', 'action', 'worker', '-l', 'INFO', '-E']
-    restart: always
-    depends_on:
-      - redis
-  flower:
-    container_name: flower
-    image: puzzlemoondev/bililive-recorder-webhook-worker
-    ports:
-      - 5555:5555
-    networks:
-      - recorder_network
-    volumes:
-      - ./action:/action
-    command: ['celery', '-A', 'action', 'flower']
-    restart: always
-    depends_on:
-      - worker
-      - redis
-  redis:
-    container_name: redis
-    image: redis:alpine
-    ports:
-      - '6379:6379'
-    networks:
-      - recorder_network
     restart: always
 networks:
   recorder_network:

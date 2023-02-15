@@ -22,14 +22,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and push worker
-        uses: docker/build-push-action@v3
-        with:
-          target: worker
-          push: true
-          tags: puzzlemoondev/bililive-recorder-webhook-worker:latest
-          cache-from: type=gha,scope=base
-          cache-to: type=gha,scope=base,mode=max
       - name: Build and push webhook
         uses: docker/build-push-action@v3
         with:

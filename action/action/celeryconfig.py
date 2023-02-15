@@ -1,4 +1,4 @@
-broker_url = "redis://redis"
+broker_url = "redis://"
 
 result_backend = broker_url
 
