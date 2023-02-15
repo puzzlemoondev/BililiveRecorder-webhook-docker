@@ -54,6 +54,5 @@ ENV PATH="$PATH:$POETRY_VENV/bin"
 RUN apk --no-cache --update add redis
 RUN mkdir -p /var/supervisord /var/redis
 COPY ./supervisord.conf /etc/supervisord.conf
-VOLUME [ "/action", "/etc/webhook" ]
 EXPOSE 5555 9000 9001
 ENTRYPOINT ["supervisord", "-c", "/etc/supervisord.conf"]
