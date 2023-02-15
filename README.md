@@ -72,8 +72,8 @@ streamers:
 
 ## Monitoring
 
-- We use [`flower`](https://github.com/mher/flower) to monitor task queues.
-- Open `localhost:5555` to see the panel.
+- We use [`flower`](https://github.com/mher/flower) to monitor task queues. Open `localhost:5555` to see the panel.
+- For supervisor, open `localhost:9001`.
 
 ## Dependencies
 
