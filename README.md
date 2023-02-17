@@ -36,6 +36,10 @@ user:
     bili_jct: "your bili_jct"
     DedeUserID__ckMd5: "your DedeUserID__ckMd5"
     DedeUserID: "your DedeUserID"
+  access_token: "your access token"
+  account:
+  	username: "your username"
+    password: "your password"
 
 streamers:
   "弥瑟里*": # supports unix glob syntax
