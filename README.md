@@ -78,4 +78,4 @@ streamers:
 - [webhook](https://github.com/adnanh/webhook)
 - [BaiduPCS-go](https://github.com/qjfoidnh/BaiduPCS-Go)
 - [aliyunpan](https://github.com/tickstep/aliyunpan)
-- [biliup](https://github.com/biliup/biliup)
+- [biliup-rs](https://github.com/ForgQi/biliup-rs)
