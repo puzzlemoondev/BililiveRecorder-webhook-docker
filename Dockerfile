@@ -1,27 +1,36 @@
-FROM golang:alpine AS build
+FROM golang:alpine AS build-go
 RUN apk add --update --no-cache wget
 WORKDIR /app
 
-FROM build AS baidupcs-go-build
-ENV BAIDUPCS_VERSION 3.9.0
-RUN wget https://github.com/qjfoidnh/BaiduPCS-Go/archive/refs/tags/v${BAIDUPCS_VERSION}.tar.gz -O baidupcs-go.tar.gz && \
-    tar -xzf baidupcs-go.tar.gz --strip 1 && \
-    go get -d && \
-    go build -o /usr/local/bin/baidupcs-go
+FROM rust:alpine AS build-rust
+RUN apk add --update --no-cache wget musl-dev
+WORKDIR /app
 
-FROM build AS aliyunpan-build
+FROM build-go AS baidupcs-build
+ENV BAIDUPCS_VERSION 3.9.0
+RUN wget https://github.com/qjfoidnh/BaiduPCS-Go/archive/refs/tags/v${BAIDUPCS_VERSION}.tar.gz -O baidupcs.tar.gz && \
+    tar -xzf baidupcs.tar.gz --strip 1 && \
+    go get -d && \
+    go build -o /usr/local/bin/baidupcs
+
+FROM build-go AS aliyunpan-build
 ENV ALIYUNPAN_VERSION 0.2.5
 RUN wget https://github.com/tickstep/aliyunpan/archive/refs/tags/v${ALIYUNPAN_VERSION}.tar.gz -O aliyunpan.tar.gz && \
     tar -xzf aliyunpan.tar.gz --strip 1 && \
-    go get -d && \
     go build -o /usr/local/bin/aliyunpan
 
-FROM build AS webhook-build
+FROM build-go AS webhook-build
 ENV WEBHOOK_VERSION 2.8.0
 RUN wget https://github.com/adnanh/webhook/archive/refs/tags/${WEBHOOK_VERSION}.tar.gz -O webhook.tar.gz && \
     tar -xzf webhook.tar.gz --strip 1 && \
-    go get -d && \
     go build -o /usr/local/bin/webhook
+
+FROM build-rust AS biliup-build
+ENV BILIUP_VERSION 0.1.15
+RUN wget https://github.com/ForgQi/biliup-rs/archive/refs/tags/v${BILIUP_VERSION}.tar.gz -O biliup.tar.gz && \
+    tar -xzf biliup.tar.gz --strip 1 && \
+    cargo build --release --bin biliup && \
+    cp target/release/biliup /usr/local/bin/biliup
 
 FROM python:3.11-alpine as python-base
 ENV PYTHONUNBUFFERED=1 \
@@ -54,12 +63,15 @@ EXPOSE 2356
 
 FROM recorder as webhook
 COPY --from=webhook-build /usr/local/bin/webhook /usr/local/bin/webhook
-COPY --from=baidupcs-go-build /usr/local/bin/baidupcs-go /usr/local/bin/baidupcs-go
+COPY --from=baidupcs-build /usr/local/bin/baidupcs /usr/local/bin/baidupcs
 COPY --from=aliyunpan-build /usr/local/bin/aliyunpan /usr/local/bin/aliyunpan
+COPY --from=biliup-build /usr/local/bin/biliup /usr/local/bin/biliup
 COPY --from=poetry-base ${POETRY_VENV} ${POETRY_VENV}
 ENV PATH="$PATH:$POETRY_VENV/bin"
 RUN apk --no-cache --update add redis
 RUN mkdir -p /var/supervisord /var/redis
 COPY ./supervisord.conf /etc/supervisord.conf
+VOLUME [ "/action" ]
+WORKDIR /action
 EXPOSE 5555 9000 9001
-ENTRYPOINT ["supervisord", "-c", "/etc/supervisord.conf"]
+CMD ["supervisord", "-c", "/etc/supervisord.conf"]

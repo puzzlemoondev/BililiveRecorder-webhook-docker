@@ -1,12 +1,10 @@
-from collections import UserDict
-from dataclasses import replace
+from dataclasses import dataclass, asdict
 from datetime import datetime
 from fnmatch import fnmatch
 from pathlib import Path
 from typing import Optional
 
 import yaml
-from biliup.plugins.bili_webup import Data
 
 from ..event import Event
 
@@ -20,59 +18,78 @@ def custom_fmtstr(string: str, date: datetime, title: str, streamer: str):
     )
 
 
-class BiliupConfig(UserDict):
-    def __init__(self, path: Path):
-        with open(path) as f:
-            super().__init__(yaml.safe_load(f))
+@dataclass
+class BiliupConfig:
+    line: Optional[str] = None
+    limit: Optional[int] = None
+    copyright: Optional[int] = None
+    source: Optional[str] = None
+    tid: Optional[int] = None
+    cover: Optional[str] = None
+    title: Optional[str] = None
+    desc: Optional[str] = None
+    dynamic: Optional[str] = None
+    tag: Optional[str] = None
+    dtime: Optional[int] = None
+    dolby: Optional[int] = None
+    hires: Optional[int] = None
+    no_reprint: Optional[int] = None
+    open_elec: Optional[int] = None
 
-    def get_user(self):
-        return self.data["user"]
+    def __init__(self, event: Event, config_path: Optional[Path]):
+        config = dict()
+        if config_path is not None:
+            with open(config_path) as f:
+                config = yaml.safe_load(f)
 
-    def to_data(self, event: Event) -> Data:
         event_date = event.get_date()
         event_title = event.get_title()
         event_streamer = event.get_streamer()
+        streamer_data = next(
+            (
+                v
+                for k, v in config.get("streamers", dict()).items()
+                if fnmatch(event_streamer, k)
+            ),
+            dict(),
+        )
 
-        streamer_data = self._get_streamer_data(event_streamer)
-        if streamer_data is None:
-            raise ValueError(
-                f"config for {event_streamer} not found inside config yaml"
-            )
-
-        data = Data()
+        if line := config.get("line"):
+            self.line = line
+        if limit := config.get("limit"):
+            self.limit = limit
         if copyright := streamer_data.get("copyright"):
-            data = replace(data, copyright=int(copyright))
+            self.copyright = copyright
         if source := streamer_data.get("source"):
-            data = replace(data, source=source)
+            self.source = source
         if tid := streamer_data.get("tid"):
-            data = replace(data, tid=int(tid))
-        if cover_path := streamer_data.get("cover_path"):
-            data = replace(data, cover=cover_path)
+            self.tid = tid
+        if cover := streamer_data.get("cover"):
+            self.cover = cover
         if title := streamer_data.get("title"):
-            data = replace(
-                data,
-                title=custom_fmtstr(title, event_date, event_title, event_streamer),
-            )
-        if desc_format_id := streamer_data.get("desc_format_id"):
-            data = replace(data, desc_format_id=int(desc_format_id))
-        if description := streamer_data.get("description"):
-            data = replace(
-                data,
-                desc=custom_fmtstr(
-                    description, event_date, event_title, event_streamer
-                ),
-            )
+            self.title = custom_fmtstr(title, event_date, event_title, event_streamer)
+        if desc := streamer_data.get("desc"):
+            self.desc = custom_fmtstr(desc, event_date, event_title, event_streamer)
         if dynamic := streamer_data.get("dynamic"):
-            data = replace(data, dynamic=dynamic)
-        if tags := streamer_data.get("tags"):
-            data = replace(data, tag=tags)
+            self.dynamic = dynamic
+        if tag := streamer_data.get("tag"):
+            if isinstance(tag, list):
+                tag = ",".join(tag)
+            self.tag = tag
         if dtime := streamer_data.get("dtime"):
-            data = replace(data, dtime=dtime)
+            self.dtime = dtime
+        if dolby := streamer_data.get("dolby"):
+            self.dolby = dolby
+        if hires := streamer_data.get("hires"):
+            self.hires = hires
+        if no_reprint := streamer_data.get("no_reprint"):
+            self.no_reprint = no_reprint
+        if open_elec := streamer_data.get("open_elec"):
+            self.open_elec = open_elec
 
-        return data
-
-    def _get_streamer_data(self, streamer: str) -> Optional[dict]:
-        streamer_dict = self.data["streamers"]
-        for streamer_key in streamer_dict.keys():
-            if fnmatch(streamer, streamer_key):
-                return streamer_dict[streamer_key]
+    def to_command_kwargs(self) -> dict:
+        return {
+            f"--{k.replace('_', '-')}": v
+            for k, v in asdict(self).items()
+            if v is not None
+        }
