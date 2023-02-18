@@ -4,13 +4,12 @@ from datetime import datetime
 from pathlib import Path
 from typing import Iterator
 
-REC_ROOT = Path("/rec")
-
 
 class Event(UserDict):
-    def __init__(self, text: str):
+    def __init__(self, text: str, root: Path = Path("/rec")):
         super().__init__(json.loads(text))
         self.text = text
+        self.root = root
 
     def get_date(self) -> datetime:
         return datetime.fromisoformat(self.data["EventData"]["FileOpenTime"])
@@ -22,7 +21,7 @@ class Event(UserDict):
         return self.data["EventData"]["Name"]
 
     def get_data_path(self, strict: bool = True) -> Path:
-        return REC_ROOT.joinpath(self.data["EventData"]["RelativePath"]).resolve(
+        return self.root.joinpath(self.data["EventData"]["RelativePath"]).resolve(
             strict=strict
         )
 

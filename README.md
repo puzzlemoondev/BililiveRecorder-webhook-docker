@@ -23,30 +23,20 @@ The [webhook](https://github.com/adnanh/webhook) server listens for `FileClosed`
 
 ## Biliup Integration
 
-- To use biliup, add your config yaml and cover files (optional) under `biliup`. This directory will be mounted to `/etc/biliup` in the container.
-- See [here](https://biliup.github.io/biliup/Guide.html#%E5%AE%8C%E6%95%B4%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%A4%BA%E4%BE%8B) for full config file format. Note that only `user` and some of `streamers` fields are supported.
-- `title` and `description` supports string interpolation. See sample.
+- To use biliup, add your `cookies.json` under `biliup`. This directory will be mounted to `/etc/biliup` in the container. Alternatively, run `docker compose run --rm -w /etc/biliup webhook biliup login` to login interactively.
+- (Optional) Add your config yaml and cover files (optional) under `biliup`. See sample for all supported fields. `title` and `desc` supports string interpolation. Run `biliup upload --help` to see default values.
 
 ### Sample `config.yml`
 
 ```
-user:
-  cookies:
-    SESSDATA: "your SESSDATA"
-    bili_jct: "your bili_jct"
-    DedeUserID__ckMd5: "your DedeUserID__ckMd5"
-    DedeUserID: "your DedeUserID"
-  access_token: "your access token"
-  account:
-  	username: "your username"
-    password: "your password"
-
+line: kodo
+limit: 3
 streamers:
   "弥瑟里*": # supports unix glob syntax
     title: "【弥瑟里seri】%Y-%m-%dT%H:%M:%S录播_{title}"
     tid: 27
     copyright: 1
-    tags:
+    tag:
       - 虚拟UP主
       - 直播
       - 录播
@@ -55,23 +45,26 @@ streamers:
       - 弥瑟里
       - seri
   "*": # all supported fields
-    title: "【{streamer}】%Y-%m-%dT%H:%M:%S录播_{title}"
-    tid: 27
     copyright: 1
     source: ''
-    cover_path: /etc/biliup/cover.png
-    desc_format_id: 0
-    description: |
+    tid: 27
+    cover: /etc/biliup/cover.png
+    title: "【{streamer}】%Y-%m-%dT%H:%M:%S录播_{title}"
+    desc: |
       streamer: {streamer}
       title: {title}
       date: %Y-%m-%dT%H:%M:%S
     dynamic: ''
-    tags:
+    tag:
       - 虚拟UP主
       - 直播
       - 录播
       - 直播录像
     dtime: 28800
+    dolby: 0
+    hires: 0
+    no_reprint: 1
+    open_elec: 0
 ```
 
 ## Monitoring

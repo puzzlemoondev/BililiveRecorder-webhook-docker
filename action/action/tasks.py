@@ -1,10 +1,8 @@
 import os
 from pathlib import Path
 
-from biliup.plugins.bili_webup import BiliBili
-
 from .celery import app
-from .command import CloudStorageCommand
+from .command import CloudStorageCommand, BiliupCommand
 from .config import BiliupConfig
 from .event import Event
 from .util import filter_suffixes, is_empty
@@ -44,7 +42,7 @@ def upload_baidupcs(path: str) -> dict:
     if not (bduss and stoken):
         return result(path, True)
 
-    command = CloudStorageCommand("baidupcs-go")
+    command = CloudStorageCommand("baidupcs")
     resolved_path = Path(path).resolve(strict=True)
     local_path = str(resolved_path)
     remote_dir = f"/{resolved_path.parent.name}"
@@ -60,24 +58,20 @@ def upload_baidupcs(path: str) -> dict:
 @app.task(**DEFAULT_TASK_ARGS)
 def upload_biliup(event_json: str) -> dict:
     event = Event(event_json)
+    cookies_path = BILIUP_CONFIG_DIR.joinpath("cookies.json")
+    if not cookies_path.exists():
+        return result(str(event.get_data_path(strict=False)), True)
+
+    command = BiliupCommand(str(cookies_path))
     config_path = next(
         filter_suffixes(BILIUP_CONFIG_DIR.glob("config.*"), ".yml", ".yaml"),
         None,
     )
-    if config_path is None:
-        return result(str(event.get_data_path(strict=False)), True)
-
-    config = BiliupConfig(config_path)
-    user = config.get_user()
-    video = config.to_data(event)
+    config = BiliupConfig(event, config_path)
     video_path = str(event.get_data_path())
-    with BiliBili(video) as bili:
-        bili.login(BILIUP_CONFIG_DIR.joinpath("bili.cookie"), user)
-        video_part = bili.upload_file(video_path)
-        video.append(video_part)
-        if video.cover:
-            video.cover = bili.cover_up(video.cover).replace("http:", "")
-        bili.submit()
+
+    command.renew()
+    command.upload(video_path, **config.to_command_kwargs())
     return result(video_path)
 
 
