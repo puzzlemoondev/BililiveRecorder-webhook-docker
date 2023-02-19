@@ -10,7 +10,6 @@ FROM build-go AS baidupcs-build
 ENV BAIDUPCS_VERSION 3.9.0
 RUN wget https://github.com/qjfoidnh/BaiduPCS-Go/archive/refs/tags/v${BAIDUPCS_VERSION}.tar.gz -O baidupcs.tar.gz && \
     tar -xzf baidupcs.tar.gz --strip 1 && \
-    go get -d && \
     go build -o /usr/local/bin/baidupcs
 
 FROM build-go AS aliyunpan-build
