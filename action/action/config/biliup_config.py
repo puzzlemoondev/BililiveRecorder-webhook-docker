@@ -89,7 +89,7 @@ class BiliupConfig:
 
     def to_command_kwargs(self) -> dict:
         return {
-            f"--{k.replace('_', '-')}": v
+            f"--{k.replace('_', '-')}": str(v)
             for k, v in asdict(self).items()
             if v is not None
         }
