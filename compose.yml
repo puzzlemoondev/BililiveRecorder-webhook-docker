@@ -1,9 +1,9 @@
 services:
   webhook:
-    # build:
-    #   context: .
-    #   target: webhook
-    image: puzzlemoondev/bililive-recorder-webhook
+    build:
+      context: .
+      target: webhook
+    # image: puzzlemoondev/bililive-recorder-webhook
     ports:
       - '2356:2356'
       - '5555:5555'
@@ -11,9 +11,8 @@ services:
       - '9001:9001'
     volumes:
       - ./rec:/rec
-      - ./action:/action
+      - ./webhook:/webhook
       - ./biliup:/etc/biliup
-      - ./webhook:/etc/webhook
     environment:
       - RECORDER_USER
       - RECORDER_PASS

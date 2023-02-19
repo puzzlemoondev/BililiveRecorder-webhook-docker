@@ -56,7 +56,7 @@ def upload_baidupcs(path: str) -> dict:
 
 
 @app.task(**DEFAULT_TASK_ARGS)
-def upload_biliup(event_json: str) -> dict:
+def upload_biliup(event_json: dict) -> dict:
     event = Event(event_json)
     cookies_path = BILIUP_CONFIG_DIR.joinpath("cookies.json")
     if not cookies_path.exists():
@@ -71,7 +71,7 @@ def upload_biliup(event_json: str) -> dict:
     video_path = str(event.get_data_path())
 
     command.renew()
-    command.upload(video_path, **config.to_command_kwargs())
+    # command.upload(video_path, **config.to_command_kwargs())
     return result(video_path)
 
 

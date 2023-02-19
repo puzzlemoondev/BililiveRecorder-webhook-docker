@@ -19,7 +19,7 @@ The [webhook](https://github.com/adnanh/webhook) server listens for `FileClosed`
 - Run `docker compose up`
 - Add webhook to settings
   - Go to Settings -> Webhook -> Webhook V2
-  - Add this line: `http://webhook:9000/hooks/recorder-file-closed`
+  - Add this line: `http://0.0.0.0:9000/hooks/recorder-file-closed`
 
 ## Biliup Integration
 

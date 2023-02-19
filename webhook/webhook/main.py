@@ -1,10 +1,12 @@
-import argparse
 from typing import Iterable
 
 from celery import group
+from fastapi import FastAPI, Body
 
-from action.event import Event
-from action.tasks import upload_aliyunpan, upload_baidupcs, upload_biliup, remove
+from .event import Event
+from .tasks import upload_aliyunpan, upload_baidupcs, upload_biliup, remove
+
+app = FastAPI()
 
 
 def tasks(event: Event) -> Iterable:
@@ -13,7 +15,7 @@ def tasks(event: Event) -> Iterable:
 
     event_data_path = str(event.get_data_path())
     yield action(
-        upload_biliup.s(event.text),
+        upload_biliup.s(event.data),
         upload_aliyunpan.s(event_data_path),
         upload_baidupcs.s(event_data_path),
     )
@@ -22,16 +24,11 @@ def tasks(event: Event) -> Iterable:
         yield action(upload_aliyunpan.s(path), upload_baidupcs.s(path))
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("event", type=str)
-    args = parser.parse_args()
-
-    event = Event(args.event)
+@app.post("/hooks/recorder-file-closed")
+def recorder_file_closed(payload: dict = Body()):
+    if payload["EventType"] != "FileClosed":
+        return
+    event = Event(payload)
     event.save()
 
     group(tasks(event)).delay()
-
-
-if __name__ == "__main__":
-    main()

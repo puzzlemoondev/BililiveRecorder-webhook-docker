@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "action"
+name = "webhook"
 version = "0.1.0"
 description = ""
 authors = ["PuzzleMoon <32855965+puzzlemoondev@users.noreply.github.com>"]
@@ -9,9 +9,9 @@ python = "^3.11"
 celery = { extras = ["redis"], version = "^5.2.7" }
 flower = "^1.2.0"
 pyyaml = "^6.0"
-
-[tool.poetry.scripts]
-action = "action.main:main"
+fastapi = "^0.92.0"
+uvicorn = { extras = ["standard"], version = "^0.20.0" }
+supervisor = "^4.2.5"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.1.0"
