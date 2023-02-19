@@ -1,8 +1,8 @@
 from celery import Celery
 
-from action import celeryconfig
+from . import celeryconfig
 
-app = Celery("action")
+app = Celery("webhook")
 app.config_from_object(celeryconfig)
 
 if __name__ == "__main__":

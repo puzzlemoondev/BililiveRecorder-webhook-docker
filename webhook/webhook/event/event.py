@@ -6,9 +6,8 @@ from typing import Iterator
 
 
 class Event(UserDict):
-    def __init__(self, text: str, root: Path = Path("/rec")):
-        super().__init__(json.loads(text))
-        self.text = text
+    def __init__(self, data: dict, root: Path = Path("/rec")):
+        super().__init__(data)
         self.root = root
 
     def get_date(self) -> datetime:

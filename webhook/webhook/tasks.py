@@ -56,7 +56,7 @@ def upload_baidupcs(path: str) -> dict:
 
 
 @app.task(**DEFAULT_TASK_ARGS)
-def upload_biliup(event_json: str) -> dict:
+def upload_biliup(event_json: dict) -> dict:
     event = Event(event_json)
     cookies_path = BILIUP_CONFIG_DIR.joinpath("cookies.json")
     if not cookies_path.exists():
