@@ -5,9 +5,8 @@ from .celery import app
 from .command import CloudStorageCommand, BiliupCommand
 from .config import BiliupConfig
 from .event import Event
-from .util import filter_suffixes, is_empty
+from .util import is_empty
 
-BILIUP_CONFIG_DIR = Path("/etc/biliup")
 DEFAULT_TASK_ARGS = dict(autoretry_for=(Exception,), default_retry_delay=10)
 
 
@@ -58,17 +57,12 @@ def upload_baidupcs(path: str) -> dict:
 @app.task(**DEFAULT_TASK_ARGS)
 def upload_biliup(event_json: dict) -> dict:
     event = Event(event_json)
-    cookies_path = BILIUP_CONFIG_DIR.joinpath("cookies.json")
-    if not cookies_path.exists():
+    config = BiliupConfig(event)
+    if not config.user_cookie.exists():
         return result(str(event.get_data_path(strict=False)), True)
 
-    command = BiliupCommand(str(cookies_path))
-    config_path = next(
-        filter_suffixes(BILIUP_CONFIG_DIR.glob("config.*"), ".yml", ".yaml"),
-        None,
-    )
-    config = BiliupConfig(event, config_path)
     video_path = str(event.get_data_path())
+    command = BiliupCommand(str(config.user_cookie))
 
     command.renew()
     command.upload(video_path, **config.to_command_kwargs())
