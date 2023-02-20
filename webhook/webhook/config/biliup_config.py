@@ -1,6 +1,7 @@
 from dataclasses import dataclass, asdict
 from datetime import datetime
 from fnmatch import fnmatch
+from itertools import chain
 from pathlib import Path
 from typing import Optional
 
@@ -100,9 +101,11 @@ class BiliupConfig:
         if open_elec := streamer_data.get("open_elec"):
             self.open_elec = open_elec
 
-    def to_command_kwargs(self) -> dict:
-        return {
-            f"--{k.replace('_', '-')}": str(v)
-            for k, v in asdict(self).items()
-            if k != "user_cookie" and v is not None
-        }
+    def to_command_args(self) -> list[str]:
+        return list(
+            chain.from_iterable(
+                [f"--{k.replace('_', '-')}", str(v)]
+                for k, v in asdict(self).items()
+                if k != "user_cookie" and v is not None
+            )
+        )

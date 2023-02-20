@@ -13,5 +13,5 @@ class BiliupCommand(Command):
     def renew(self) -> str:
         return self("renew")
 
-    def upload(self, video_path: str, **options) -> str:
-        return self("upload", video_path, **options)
+    def upload(self, video_path: str, *options: str) -> str:
+        return self("upload", video_path, *options)

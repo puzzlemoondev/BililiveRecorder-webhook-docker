@@ -65,7 +65,7 @@ def upload_biliup(event_json: dict) -> dict:
     command = BiliupCommand(str(config.user_cookie))
 
     command.renew()
-    command.upload(video_path, **config.to_command_kwargs())
+    command.upload(video_path, *config.to_command_args())
     return result(video_path)
 
 
