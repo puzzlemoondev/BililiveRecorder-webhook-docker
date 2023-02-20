@@ -25,6 +25,7 @@ The [webhook](https://github.com/adnanh/webhook) server listens for `FileClosed`
 
 - To use biliup, add your `cookies.json` under `biliup`. This directory will be mounted to `/etc/biliup` in the container. Alternatively, run `docker compose run --rm -w /etc/biliup webhook biliup login` to login interactively.
 - (Optional) Add your config yaml and cover files (optional) under `biliup`. See sample for all supported fields. `title` and `desc` supports string interpolation. Run `biliup upload --help` to see default values.
+- If you have multiple bilibili accounts, put all their cookies json inside `/etc/biliup` and specify their name in your config yaml.
 
 ### Sample `config.yml`
 
@@ -45,6 +46,7 @@ streamers:
       - 弥瑟里
       - seri
   "*": # all supported fields
+    user_cookie: cookies_for_another_account.json # defaults to cookies.json
     copyright: 1
     source: ''
     tid: 27

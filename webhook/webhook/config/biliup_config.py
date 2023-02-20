@@ -7,6 +7,9 @@ from typing import Optional
 import yaml
 
 from ..event import Event
+from ..util import filter_suffixes
+
+BILIUP_CONFIG_DIR = Path("/etc/biliup")
 
 
 def custom_fmtstr(string: str, date: datetime, title: str, streamer: str):
@@ -22,6 +25,7 @@ def custom_fmtstr(string: str, date: datetime, title: str, streamer: str):
 class BiliupConfig:
     line: Optional[str] = None
     limit: Optional[int] = None
+    user_cookie: Path = BILIUP_CONFIG_DIR.joinpath("cookies.json")
     copyright: Optional[int] = None
     source: Optional[str] = None
     tid: Optional[int] = None
@@ -36,8 +40,12 @@ class BiliupConfig:
     no_reprint: Optional[int] = None
     open_elec: Optional[int] = None
 
-    def __init__(self, event: Event, config_path: Optional[Path]):
+    def __init__(self, event: Event):
         config = dict()
+        config_path = next(
+            filter_suffixes(BILIUP_CONFIG_DIR.glob("config.*"), ".yml", ".yaml"),
+            None,
+        )
         if config_path is not None:
             with open(config_path) as f:
                 config = yaml.safe_load(f)
@@ -58,6 +66,11 @@ class BiliupConfig:
             self.line = line
         if limit := config.get("limit"):
             self.limit = limit
+        if user_cookie := streamer_data.get("user_cookie"):
+            # force resolve path since file is expected to exist.
+            self.user_cookie = BILIUP_CONFIG_DIR.joinpath(user_cookie).resolve(
+                strict=True
+            )
         if copyright := streamer_data.get("copyright"):
             self.copyright = copyright
         if source := streamer_data.get("source"):
@@ -91,5 +104,5 @@ class BiliupConfig:
         return {
             f"--{k.replace('_', '-')}": str(v)
             for k, v in asdict(self).items()
-            if v is not None
+            if k != "user_cookie" and v is not None
         }
