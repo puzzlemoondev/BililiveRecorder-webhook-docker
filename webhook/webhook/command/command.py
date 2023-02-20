@@ -6,6 +6,4 @@ class Command:
         self.executable = executable
 
     def __call__(self, *args) -> str:
-        return subprocess.check_output(
-            [self.executable, *args], encoding="utf8"
-        )
+        return subprocess.check_output([self.executable, *args], encoding="utf8")

@@ -1,4 +1,4 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from datetime import datetime
 from fnmatch import fnmatch
 from itertools import chain
@@ -8,7 +8,7 @@ from typing import Optional
 import yaml
 
 from ..event import Event
-from ..util import filter_suffixes
+from ..util import DictionaryConvertible, filter_suffixes
 
 BILIUP_CONFIG_DIR = Path("/etc/biliup")
 
@@ -23,7 +23,7 @@ def custom_fmtstr(string: str, date: datetime, title: str, streamer: str):
 
 
 @dataclass
-class BiliupConfig:
+class BiliupConfig(DictionaryConvertible):
     line: Optional[str] = None
     limit: Optional[int] = None
     user_cookie: Path = BILIUP_CONFIG_DIR.joinpath("cookies.json")
@@ -102,10 +102,13 @@ class BiliupConfig:
             self.open_elec = open_elec
 
     def to_command_args(self) -> list[str]:
+        data = self.to_dict()
+        data.pop("user_cookie")
+
         return list(
             chain.from_iterable(
                 [f"--{k.replace('_', '-')}", str(v)]
-                for k, v in asdict(self).items()
-                if k != "user_cookie" and v is not None
+                for k, v in data.items()
+                if v is not None
             )
         )
