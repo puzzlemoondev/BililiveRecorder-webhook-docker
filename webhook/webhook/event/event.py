@@ -3,6 +3,7 @@ from collections import UserDict
 from datetime import datetime
 from pathlib import Path
 from typing import Iterator
+from ..util import filter_suffixes
 
 
 class Event(UserDict):
@@ -23,6 +24,9 @@ class Event(UserDict):
         return self.root.joinpath(self.data["EventData"]["RelativePath"]).resolve(
             strict=strict
         )
+
+    def get_danmaku_path(self) -> Path:
+        return next(filter_suffixes(self.get_metadata_paths(), '.xml'))
 
     def get_metadata_paths(self) -> Iterator[Path]:
         data_path = self.get_data_path()

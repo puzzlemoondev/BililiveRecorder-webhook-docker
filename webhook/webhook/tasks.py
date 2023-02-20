@@ -1,8 +1,9 @@
 import os
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from .celery import app
-from .command import CloudStorageCommand, BiliupCommand
+from .command import CloudStorageCommand, BiliupCommand, FFMPEGCommand, DanmakuFactoryCommand
 from .config import BiliupConfig
 from .event import Event
 from .util import is_empty
@@ -20,16 +21,16 @@ def upload_aliyunpan(path: str) -> dict:
     if not rtoken:
         return result(path, True)
 
-    command = CloudStorageCommand("aliyunpan")
+    aliyunpan = CloudStorageCommand("aliyunpan")
 
     resolved_path = Path(path).resolve(strict=True)
     local_path = str(resolved_path)
     remote_dir = f"/{resolved_path.parent.name}"
 
-    if not command.has_account():
-        command.login("-RefreshToken", rtoken)
-    command.upload(local_path, remote_dir)
-    if not command.remote_contains(local_path, remote_dir):
+    if not aliyunpan.has_account():
+        aliyunpan.login("-RefreshToken", rtoken)
+    aliyunpan.upload(local_path, remote_dir)
+    if not aliyunpan.remote_contains(local_path, remote_dir):
         raise AssertionError(f"{resolved_path} not uploaded to aliyunpan")
     return result(path)
 
@@ -41,15 +42,15 @@ def upload_baidupcs(path: str) -> dict:
     if not (bduss and stoken):
         return result(path, True)
 
-    command = CloudStorageCommand("baidupcs")
+    baidupcs = CloudStorageCommand("baidupcs")
     resolved_path = Path(path).resolve(strict=True)
     local_path = str(resolved_path)
     remote_dir = f"/{resolved_path.parent.name}"
 
-    if not command.has_account():
-        command.login("-bduss", bduss, "-stoken", stoken)
-    command.upload(local_path, remote_dir)
-    if not command.remote_contains(local_path, remote_dir):
+    if not baidupcs.has_account():
+        baidupcs.login("-bduss", bduss, "-stoken", stoken)
+    baidupcs.upload(local_path, remote_dir)
+    if not baidupcs.remote_contains(local_path, remote_dir):
         raise AssertionError(f"{resolved_path} not uploaded to baidupcs")
     return result(path)
 
@@ -61,12 +62,31 @@ def upload_biliup(event_json: dict) -> dict:
     if not config.user_cookie.exists():
         return result(str(event.get_data_path(strict=False)), True)
 
-    video_path = str(event.get_data_path())
-    command = BiliupCommand(str(config.user_cookie))
+    video_path = event.get_data_path()
+    biliup = BiliupCommand(str(config.user_cookie))
 
-    command.renew()
-    command.upload(video_path, *config.to_command_args())
-    return result(video_path)
+    with TemporaryDirectory() as tmpdir:
+        if os.environ.get("BILIUP_BURN_DANMAKU", "0") != "0":
+            source_path = video_path
+            danmaku_path = event.get_danmaku_path()
+            video_path = Path(tmpdir).joinpath(video_path.name)
+            subtitles_path = video_path.with_suffix('.ass')
+
+            danmaku_factory = DanmakuFactoryCommand()
+            danmaku_factory(str(danmaku_path), str(subtitles_path))
+
+            ffmpeg = FFMPEGCommand()
+            ffmpeg.add_subtitles(
+                str(source_path),
+                str(video_path),
+                str(subtitles_path)
+            )
+
+        video_path = str(video_path)
+
+        biliup.renew()
+        biliup.upload(video_path, *config.to_command_args())
+        return result(video_path)
 
 
 @app.task(**DEFAULT_TASK_ARGS)
