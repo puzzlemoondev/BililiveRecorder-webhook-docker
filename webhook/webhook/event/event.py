@@ -2,8 +2,8 @@ import json
 from collections import UserDict
 from datetime import datetime
 from pathlib import Path
-from typing import Iterator
-from ..util import filter_suffixes
+
+from .event_files import EventFiles
 
 
 class Event(UserDict):
@@ -20,22 +20,13 @@ class Event(UserDict):
     def get_streamer(self) -> str:
         return self.data["EventData"]["Name"]
 
-    def get_data_path(self, strict: bool = True) -> Path:
-        return self.root.joinpath(self.data["EventData"]["RelativePath"]).resolve(
-            strict=strict
-        )
-
-    def get_danmaku_path(self) -> Path:
-        return next(filter_suffixes(self.get_metadata_paths(), '.xml'))
-
-    def get_metadata_paths(self) -> Iterator[Path]:
-        data_path = self.get_data_path()
-        for path in data_path.parent.glob(f"{data_path.stem}.*"):
-            if path != data_path:
-                yield path
+    def get_event_files(self, ensure_data: bool = True) -> EventFiles:
+        relative_path = self.data["EventData"]["RelativePath"]
+        data_path = self.root.joinpath(relative_path).resolve(strict=ensure_data)
+        return EventFiles(data_path=data_path)
 
     def save(self) -> Path:
-        output_path = self.get_data_path().with_suffix(".json")
+        output_path = self.get_event_files(ensure_data=False).event
         with open(output_path, "w") as f:
             json.dump(self.data, f, indent=4, sort_keys=True, ensure_ascii=False)
         return output_path

@@ -1,9 +1,7 @@
 services:
   webhook:
-    # build:
-    #   context: .
-    #   target: webhook
-    image: puzzlemoondev/bililive-recorder-webhook
+    # image: puzzlemoondev/bililive-recorder-webhook:local
+    image: puzzlemoondev/bililive-recorder-webhook:latest
     ports:
       - '2356:2356'
       - '5555:5555'

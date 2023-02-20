@@ -1,1 +1,2 @@
-from .biliup_config import BiliupConfig
+from .biliup_config import *
+from .config import *
