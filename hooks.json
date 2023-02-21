@@ -1,0 +1,29 @@
+[
+  {
+    "id": "recorder-file-closed",
+    "execute-command": "python",
+    "pass-arguments-to-command": [
+      {
+        "source": "string",
+        "name": "-m"
+      },
+      {
+        "source": "string",
+        "name": "webhook"
+      },
+      {
+        "source": "entire-payload"
+      }
+    ],
+    "trigger-rule": {
+      "match": {
+        "type": "value",
+        "value": "FileClosed",
+        "parameter": {
+          "source": "payload",
+          "name": "EventType"
+        }
+      }
+    }
+  }
+]
