@@ -77,6 +77,7 @@ streamers:
 ## Dependencies
 
 - [BililiveRecorder](https://github.com/BililiveRecorder/BililiveRecorder)
+- [webhook](https://github.com/adnanh/webhook)
 - [BaiduPCS-go](https://github.com/qjfoidnh/BaiduPCS-Go)
 - [aliyunpan](https://github.com/tickstep/aliyunpan)
 - [biliup-rs](https://github.com/ForgQi/biliup-rs)
