@@ -40,12 +40,7 @@ COPY --from=biliup-source /source /build
 RUN cargo build --release --offline --bin biliup && \
     cp target/release/biliup /biliup
 
-FROM python:alpine as base
-WORKDIR /webhook
-COPY ./webhook/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-FROM base as recorder
+FROM python:alpine as recorder
 RUN apk add --upgrade --no-cache aspnetcore6-runtime tzdata
 ENV TZ=Asia/Shanghai
 WORKDIR /recorder
@@ -57,11 +52,13 @@ COPY --from=webhook-build /webhook /usr/local/bin/webhook
 COPY --from=aliyunpan-build /aliyunpan /usr/local/bin/aliyunpan
 COPY --from=baidupcs-build /baidupcs /usr/local/bin/baidupcs
 COPY --from=biliup-build /biliup /usr/local/bin/biliup
-RUN apk add --upgrade --no-cache redis
+RUN apk add --upgrade --no-cache redis ffmpeg font-noto font-noto-cjk font-noto-emoji
 RUN mkdir -p /var/supervisord /var/redis
 COPY ./supervisord.conf /etc/supervisord.conf
 COPY ./hooks.json /etc/hooks.json
 WORKDIR /webhook
+COPY ./webhook/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 COPY ./webhook .
 EXPOSE 5555 9001
 CMD ["supervisord", "-c", "/etc/supervisord.conf"]
