@@ -25,7 +25,7 @@ jobs:
       - name: Build and push webhook
         uses: docker/build-push-action@v3
         with:
-          push: true
+          push: false
           tags: puzzlemoondev/bililive-recorder-webhook:latest
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           build-args: |
