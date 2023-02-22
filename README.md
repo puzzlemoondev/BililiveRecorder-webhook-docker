@@ -1,7 +1,6 @@
 # BililiveRecorder-webhook-docker
 
 [![Publish](https://github.com/puzzlemoondev/BililiveRecorder-webhook-docker/actions/workflows/publish.yml/badge.svg)](https://github.com/puzzlemoondev/BililiveRecorder-webhook-docker/actions/workflows/publish.yml)
-[![Docker Image Version (latest by date)](https://img.shields.io/docker/v/puzzlemoondev/bililive-recorder-webhook)](https://hub.docker.com/r/puzzlemoondev/bililive-recorder-webhook)
 [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/puzzlemoondev/bililive-recorder-webhook/latest)](https://hub.docker.com/r/puzzlemoondev/bililive-recorder-webhook)
 
 Dockerized [BililiveRecorder](https://github.com/BililiveRecorder/BililiveRecorder) with biliup, baidupcs and aliyunpan upload webhook.
