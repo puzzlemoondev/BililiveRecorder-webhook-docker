@@ -1,0 +1,5 @@
+webhook/
+!webhook/requirements.txt
+!webhook/webhook/
+**/__pycache__
+*.pyc
