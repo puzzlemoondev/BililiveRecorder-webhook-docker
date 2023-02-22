@@ -1,6 +1,5 @@
 services:
   webhook:
-    # image: puzzlemoondev/bililive-recorder-webhook:local
     image: puzzlemoondev/bililive-recorder-webhook:latest
     ports:
       - '2356:2356'
@@ -8,7 +7,6 @@ services:
       - '9001:9001'
     volumes:
       - ./rec:/rec
-      - ./webhook:/webhook
       - ./biliup:/etc/biliup
     environment:
       - RECORDER_USER
@@ -16,4 +14,6 @@ services:
       - BAIDUPCS_BDUSS
       - BAIDUPCS_STOKEN
       - ALIYUNPAN_RTOKEN
+      - BURN_DANMAKU
+      - DANMAKU_FACTORY_ARGS
     restart: always
