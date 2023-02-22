@@ -28,5 +28,7 @@ jobs:
           push: true
           tags: puzzlemoondev/bililive-recorder-webhook:latest
           platforms: linux/amd64,linux/arm/v7,linux/arm64
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
           cache-from: type=gha
           cache-to: type=gha,mode=max
