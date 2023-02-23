@@ -35,16 +35,19 @@ class Composer:
     def get_upload_signatures(self) -> Iterator[Signature]:
         files = self.event.get_event_files()
 
-        for video_path in files.get_video_paths():
-            yield chord(
-                self.get_all_upload_signatures(video_path),
-                self.get_remove_signature(video_path),
-            )
-        for metadata_path in files.get_metadata_paths():
-            yield chord(
-                self.get_all_upload_signatures(metadata_path),
-                self.get_remove_signature(metadata_path),
-            )
+        bilibili_upload_path = (
+            files.burned if self.config.bilibili_upload_burned else files.data
+        )
+        yield chord(
+            self.get_all_upload_signatures(bilibili_upload_path),
+            self.get_remove_signature(bilibili_upload_path),
+        )
+        for path in files:
+            if path != bilibili_upload_path:
+                yield chord(
+                    self.get_cloud_storage_upload_signatures(path),
+                    self.get_remove_signature(path),
+                )
 
     def get_cloud_storage_upload_signatures(self, path: Path) -> Iterator[Signature]:
         signatures = [

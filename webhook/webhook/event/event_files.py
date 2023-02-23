@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Iterator
 
 from ..util import DictionaryConvertible
 
@@ -21,8 +22,5 @@ class EventFiles(DictionaryConvertible):
         self.subtitles = data_path.with_suffix(".ass")
         self.error_log = data_path.with_suffix(".txt")
 
-    def get_video_paths(self) -> list[Path]:
-        return [self.data, self.burned]
-
-    def get_metadata_paths(self) -> list[Path]:
-        return [self.event, self.danmaku, self.subtitles, self.error_log]
+    def __iter__(self) -> Iterator[Path]:
+        yield from self.to_dict().values()

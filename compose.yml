@@ -16,4 +16,5 @@ services:
       - ALIYUNPAN_RTOKEN
       - BURN_DANMAKU
       - DANMAKU_FACTORY_ARGS
+      - BILIBILI_UPLOAD_BURNED
     restart: always

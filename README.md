@@ -21,6 +21,7 @@ The [webhook](https://github.com/adnanh/webhook) server listens for `FileClosed`
   - ALIYUNPAN_RTOKEN: refresh token for aliyunpan login. See [aliyunpan](https://github.com/tickstep/aliyunpan#%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96RefreshToken) for how to retrieve.
   - BURN_DANMAKU: pass 1 to turn danmaku burning on. This creates a separate video file with hardcoded danmaku.
   - DANMAKU_FACTORY_ARGS: args that controls the `.ass` subtitles generated from BiliveRecorder danmaku. See [DanmakuFactory](https://github.com/hihkm/DanmakuFactory) for args. `-i`, `-o` args should not be included. Font name is not necessary since only noto fonts are installed.
+  - BILIBILI_UPLOAD_BURNED: pass 1 to upload video with danmaku instead of the original.
 - Run `docker compose up`
 - Add webhook to settings
   - Go to Settings -> Webhook -> Webhook V2
