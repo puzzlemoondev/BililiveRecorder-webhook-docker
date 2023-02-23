@@ -11,12 +11,16 @@ The [webhook](https://github.com/adnanh/webhook) server listens for `FileClosed`
 
 ## How to use
 
+> ⚠️ DO NOT TURN BURN_DANMAKU ON if your machine is low on resource.
+
 - Add a [`.env` file](https://docs.docker.com/compose/environment-variables/#the-env-file) with these variables. For baidupcs, provide both bduss and stoken. For aliyunpan, provide rtoken. Providing credentials for both platform at the same time triggers upload to both platform concurrently.
   - RECORDER_USER: username for BiliveRecorder
   - RECORDER_PASS: password for BiliveRecorder
   - BAIDUPCS_BDUSS: bduss for baidupcs login. See [baidupcs](https://github.com/qjfoidnh/BaiduPCS-Go#%E7%99%BB%E5%BD%95%E7%99%BE%E5%BA%A6%E5%B8%90%E5%8F%B7) for how to retrieve.
   - BAIDUPCS_STOKEN: stoken for baidupcs login. See [baidupcs](https://github.com/qjfoidnh/BaiduPCS-Go#%E7%99%BB%E5%BD%95%E7%99%BE%E5%BA%A6%E5%B8%90%E5%8F%B7) for how to retrieve.
   - ALIYUNPAN_RTOKEN: refresh token for aliyunpan login. See [aliyunpan](https://github.com/tickstep/aliyunpan#%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96RefreshToken) for how to retrieve.
+  - BURN_DANMAKU: pass 1 to turn danmaku burning on. This creates a separate video file with hardcoded danmaku.
+  - DANMAKU_FACTORY_ARGS: args that controls the `.ass` subtitles generated from BiliveRecorder danmaku. See [DanmakuFactory](https://github.com/hihkm/DanmakuFactory) for args. `-i`, `-o` args should not be included. Font name is not necessary since only noto fonts are installed.
 - Run `docker compose up`
 - Add webhook to settings
   - Go to Settings -> Webhook -> Webhook V2
