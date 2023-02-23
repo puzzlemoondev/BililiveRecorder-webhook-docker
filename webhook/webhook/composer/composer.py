@@ -1,7 +1,7 @@
 from pathlib import Path
-from typing import Optional, Iterator
+from typing import Optional, Iterator, Iterable, Callable
 
-from celery.canvas import chord, group, Signature
+from celery.canvas import chain, chord, group, Signature
 
 from ..config import Config, BiliupConfig
 from ..event import Event
@@ -29,25 +29,33 @@ class Composer:
     def __call__(self) -> Signature:
         upload_signature = group(self.get_upload_signatures())
         if burn_danmaku_signature := self.get_burn_danmaku_signature():
-            return burn_danmaku_signature.on_error(upload_signature) | upload_signature
+            return chain(
+                burn_danmaku_signature.on_error(upload_signature), upload_signature
+            )
         return upload_signature
 
     def get_upload_signatures(self) -> Iterator[Signature]:
         files = self.event.get_event_files()
 
+        def get_signature(
+            signatures_builder: Callable[[Path], Iterable[Signature]], path: Path
+        ) -> Signature:
+            signatures = signatures_builder(path)
+            if remove_signature := self.get_remove_signature(path):
+                return chord(signatures, remove_signature)
+            return group(signatures)
+
         bilibili_upload_path = (
             files.burned if self.config.bilibili_upload_burned else files.data
         )
-        yield chord(
-            self.get_all_upload_signatures(bilibili_upload_path),
-            self.get_remove_signature(bilibili_upload_path),
-        )
-        for path in files:
-            if path != bilibili_upload_path:
-                yield chord(
-                    self.get_cloud_storage_upload_signatures(path),
-                    self.get_remove_signature(path),
-                )
+        yield get_signature(self.get_all_upload_signatures, bilibili_upload_path)
+
+        for cloud_storage_upload_path in filter(
+            lambda path: path != bilibili_upload_path, files
+        ):
+            yield get_signature(
+                self.get_cloud_storage_upload_signatures, cloud_storage_upload_path
+            )
 
     def get_cloud_storage_upload_signatures(self, path: Path) -> Iterator[Signature]:
         signatures = [
@@ -106,7 +114,9 @@ class Composer:
         )
         return upload_baidupcs.si(input.to_dict())
 
-    @staticmethod
-    def get_remove_signature(path: Path) -> Signature:
+    def get_remove_signature(self, path: Path) -> Optional[Signature]:
+        if not self.config.remove_local:
+            return
+
         input = RemoveTaskInput(path=str(path))
         return remove.si(input.to_dict())

@@ -11,6 +11,7 @@ class Config:
     burn_danmaku: bool
     danmaku_factory_args: list[str]
     bilibili_upload_burned: bool
+    remove_local: bool
 
     def __init__(self):
         self.baidupcs_bduss = os.environ.get("BAIDUPCS_BDUSS") or None
@@ -21,3 +22,4 @@ class Config:
         self.bilibili_upload_burned = (
             os.environ.get("BILIBILI_UPLOAD_BURNED", "0") != "0"
         )
+        self.remove_local = os.environ.get("REMOVE_LOCAL", "0") != "0"

@@ -17,4 +17,5 @@ services:
       - BURN_DANMAKU
       - DANMAKU_FACTORY_ARGS
       - BILIBILI_UPLOAD_BURNED
+      - REMOVE_LOCAL
     restart: always
