@@ -47,7 +47,9 @@ class Composer:
 
         # TODO refactor: move burn checking out and prioritize upload if not upload burned
         bilibili_upload_path = (
-            files.burned if self.config.burn_danmaku and self.config.bilibili_upload_burned else files.data
+            files.burned
+            if self.config.burn_danmaku and self.config.bilibili_upload_burned
+            else files.data
         )
         yield get_signature(self.get_all_upload_signatures, bilibili_upload_path)
 

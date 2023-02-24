@@ -1,20 +1,19 @@
 import argparse
-import json
 
 from .composer import Composer
 from .config import Config
 from .event import Event
+from .util import ParseJSONAction
 
 config = Config()
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("event", type=str)
+    parser.add_argument("event", action=ParseJSONAction)
     args = parser.parse_args()
 
-    payload = json.loads(args.event)
-    event = Event(payload)
+    event = Event(args.event)
     event.save()
 
     composer = Composer(event, config)
