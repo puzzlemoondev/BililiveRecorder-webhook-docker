@@ -20,9 +20,7 @@ class UploadBaidupcsTaskOutput(Output):
 class UploadBaidupcsTask(Task[UploadBaidupcsTaskInput, UploadBaidupcsTaskOutput]):
     def __init__(self, input: UploadBaidupcsTaskInput):
         super().__init__(input)
-        self.baidupcs = BaidupcsCommand(
-            bduss=self.input.bduss, stoken=self.input.stoken
-        )
+        self.baidupcs = BaidupcsCommand(bduss=self.input.bduss, stoken=self.input.stoken)
 
     def run(self) -> UploadBaidupcsTaskOutput:
         exists = Path(self.input.path).exists()

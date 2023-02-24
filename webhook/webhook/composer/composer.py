@@ -1,10 +1,11 @@
 from pathlib import Path
-from typing import Optional, Iterator, Iterable, Callable
+from typing import Optional, Callable, Iterator
 
+from boltons.setutils import IndexedSet
 from celery.canvas import chain, chord, group, Signature
 
 from ..config import Config, BiliupConfig
-from ..event import Event
+from ..event import Event, EventFiles
 from ..task import (
     BurnDanmakuTaskInput,
     UploadAliyunpanTaskInput,
@@ -19,6 +20,7 @@ from ..tasks import (
     upload_bilibili,
     remove,
 )
+from ..util import compact
 
 
 class Composer:
@@ -27,52 +29,117 @@ class Composer:
         self.config = config
 
     def __call__(self) -> Signature:
-        upload_signature = group(self.get_upload_signatures())
-        if burn_danmaku_signature := self.get_burn_danmaku_signature():
-            return chain(
-                burn_danmaku_signature.on_error(upload_signature), upload_signature
-            )
-        return upload_signature
-
-    def get_upload_signatures(self) -> Iterator[Signature]:
         files = self.event.get_event_files()
 
-        def get_signature(
-            signatures_builder: Callable[[Path], Iterable[Signature]], path: Path
-        ) -> Signature:
-            signatures = signatures_builder(path)
-            if remove_signature := self.get_remove_signature(path):
-                return chord(signatures, remove_signature)
-            return group(signatures)
+        if burn_danmaku_signature := self.get_burn_danmaku_signature():
+            if self.config.bilibili_upload_burned:
+                return self.get_burn_danmaku_upload_bilibili_upload_cloud_signature(files, burn_danmaku_signature)
+            return self.get_upload_bilibili_burn_danmaku_upload_cloud_signature(files, burn_danmaku_signature)
+        return self.get_upload_bilibili_upload_cloud_signature(files)
 
-        # TODO refactor: move burn checking out and prioritize upload if not upload burned
-        bilibili_upload_path = (
-            files.burned
-            if self.config.burn_danmaku and self.config.bilibili_upload_burned
-            else files.data
+    def get_burn_danmaku_upload_bilibili_upload_cloud_signature(
+        self, files: EventFiles, burn_danmaku_signature: Signature
+    ) -> Signature:
+        return group(
+            [
+                chain(
+                    burn_danmaku_signature,
+                    group(
+                        [
+                            self.get_upload_bilibili_and_cloud_signature(files.burned),
+                            self.get_upload_cloud_signature(files.subtitles),
+                        ]
+                    ),
+                ),
+                *(
+                    self.get_upload_cloud_signature(path)
+                    for path in IndexedSet(files).iter_difference({files.burned, files.subtitles})
+                ),
+            ]
         )
-        yield get_signature(self.get_all_upload_signatures, bilibili_upload_path)
 
-        for cloud_storage_upload_path in filter(
-            lambda path: path != bilibili_upload_path, files
-        ):
-            yield get_signature(
-                self.get_cloud_storage_upload_signatures, cloud_storage_upload_path
-            )
+    def get_upload_bilibili_burn_danmaku_upload_cloud_signature(
+        self, files: EventFiles, burn_danmaku_signature: Signature
+    ) -> Signature:
+        return group(
+            [
+                chord(
+                    [
+                        self.get_upload_bilibili_and_cloud_signature(files.data, remove_after=False),
+                        self.get_upload_cloud_signature(files.danmaku, remove_after=False),
+                        chain(
+                            burn_danmaku_signature,
+                            group(
+                                [
+                                    self.get_upload_cloud_signature(files.burned),
+                                    self.get_upload_cloud_signature(files.subtitles),
+                                ]
+                            ),
+                        ),
+                    ],
+                    group(
+                        compact(
+                            [
+                                self.get_remove_signature(files.data),
+                                self.get_remove_signature(files.danmaku),
+                            ]
+                        )
+                    ),
+                ),
+                *(
+                    self.get_upload_cloud_signature(path)
+                    for path in IndexedSet(files).iter_difference(
+                        {
+                            files.burned,
+                            files.subtitles,
+                            files.data,
+                            files.danmaku,
+                        }
+                    )
+                ),
+            ]
+        )
 
-    def get_cloud_storage_upload_signatures(self, path: Path) -> Iterator[Signature]:
-        signatures = [
-            self.get_upload_aliyunpan_signature(path),
-            self.get_upload_baidupcs_signature(path),
-        ]
-        return filter(bool, signatures)
+    def get_upload_bilibili_upload_cloud_signature(self, files: EventFiles) -> Signature:
+        return group(
+            [
+                self.get_upload_bilibili_and_cloud_signature(files.data),
+                *(
+                    self.get_upload_cloud_signature(path)
+                    for path in IndexedSet(files).iter_difference({files.burned, files.subtitles, files.data})
+                ),
+            ]
+        )
 
-    def get_all_upload_signatures(self, path: Path) -> Iterator[Signature]:
-        signatures = [
-            self.get_upload_bilibili_signature(path),
-            *self.get_cloud_storage_upload_signatures(path),
-        ]
-        return filter(bool, signatures)
+    def get_upload_bilibili_and_cloud_signature(self, path: Path, remove_after: bool = True) -> Signature:
+        def signatures_builder(_path: Path):
+            return [
+                self.get_upload_bilibili_signature(_path),
+                self.get_upload_aliyunpan_signature(_path),
+                self.get_upload_baidupcs_signature(_path),
+            ]
+
+        return self.get_signature(signatures_builder, path, remove_after)
+
+    def get_upload_cloud_signature(self, path: Path, remove_after: bool = True) -> Signature:
+        def signatures_builder(_path: Path):
+            return [
+                self.get_upload_aliyunpan_signature(_path),
+                self.get_upload_baidupcs_signature(_path),
+            ]
+
+        return self.get_signature(signatures_builder, path, remove_after)
+
+    def get_signature(
+        self,
+        signatures_builder: Callable[[Path], Iterator[Optional[Signature]]],
+        path: Path,
+        remove_after: bool,
+    ) -> Signature:
+        signatures = compact(signatures_builder(path))
+        if remove_after and (remove_signature := self.get_remove_signature(path)):
+            return chord(signatures, remove_signature)
+        return group(signatures)
 
     def get_burn_danmaku_signature(self) -> Optional[Signature]:
         if not self.config.burn_danmaku:
@@ -98,24 +165,18 @@ class Composer:
         return upload_bilibili.si(input.to_dict())
 
     def get_upload_aliyunpan_signature(self, path: Path) -> Optional[Signature]:
-        if not self.config.aliyunpan_rtoken:
-            return
-
-        input = UploadAliyunpanTaskInput(
-            rtoken=self.config.aliyunpan_rtoken, path=str(path)
-        )
-        return upload_aliyunpan.si(input.to_dict())
+        if rtoken := self.config.aliyunpan_rtoken:
+            input = UploadAliyunpanTaskInput(rtoken=rtoken, path=str(path))
+            return upload_aliyunpan.si(input.to_dict())
 
     def get_upload_baidupcs_signature(self, path: Path) -> Optional[Signature]:
-        if not (self.config.baidupcs_bduss and self.config.baidupcs_stoken):
-            return
-
-        input = UploadBaidupcsTaskInput(
-            bduss=self.config.baidupcs_bduss,
-            stoken=self.config.baidupcs_stoken,
-            path=str(path),
-        )
-        return upload_baidupcs.si(input.to_dict())
+        if (bduss := self.config.baidupcs_bduss) and (stoken := self.config.baidupcs_stoken):
+            input = UploadBaidupcsTaskInput(
+                bduss=bduss,
+                stoken=stoken,
+                path=str(path),
+            )
+            return upload_baidupcs.si(input.to_dict())
 
     def get_remove_signature(self, path: Path) -> Optional[Signature]:
         if not self.config.remove_local:

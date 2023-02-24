@@ -1,5 +1,5 @@
-celery[redis] >= 5.2.7
-flower >= 1.2.0
-pyyaml >= 6.0
-supervisor >= 4.2.5
-dataclass-factory >= 2.16
+boltons>=23.0.0
+celery[redis]>=5.2.7
+flower>=1.2.0
+pyyaml>=6.0
+supervisor>=4.2.5

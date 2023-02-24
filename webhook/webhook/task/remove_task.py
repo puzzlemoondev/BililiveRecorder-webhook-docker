@@ -29,9 +29,7 @@ class RemoveTask(Task[RemoveTaskInput, RemoveTaskOutput]):
             path.unlink(missing_ok=True)
             parent_removed = self.remove_parent(path)
 
-        return RemoveTaskOutput(
-            path=self.input.path, parent_removed=parent_removed, skipped=not exists
-        )
+        return RemoveTaskOutput(path=self.input.path, parent_removed=parent_removed, skipped=not exists)
 
     @staticmethod
     def remove_parent(path: Path) -> bool:

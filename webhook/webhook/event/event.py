@@ -23,7 +23,7 @@ class Event(UserDict):
     def get_event_files(self, ensure_data: bool = True) -> EventFiles:
         relative_path = self.data["EventData"]["RelativePath"]
         data_path = self.root.joinpath(relative_path).resolve(strict=ensure_data)
-        return EventFiles(data_path=data_path)
+        return EventFiles(data=data_path)
 
     def save(self) -> Path:
         output_path = self.get_event_files(ensure_data=False).event
