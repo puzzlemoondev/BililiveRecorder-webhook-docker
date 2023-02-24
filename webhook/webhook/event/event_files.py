@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterator
 
@@ -8,19 +8,18 @@ from ..util import DictionaryConvertible
 @dataclass
 class EventFiles(DictionaryConvertible):
     data: Path
-    event: Path
-    danmaku: Path
-    burned: Path
-    subtitles: Path
-    error_log: Path
+    event: Path = field(init=False)
+    danmaku: Path = field(init=False)
+    burned: Path = field(init=False)
+    subtitles: Path = field(init=False)
+    error_log: Path = field(init=False)
 
-    def __init__(self, data_path: Path):
-        self.data = data_path
-        self.event = data_path.with_suffix(".json")
-        self.danmaku = data_path.with_suffix(".xml")
-        self.burned = data_path.with_suffix(".mp4")
-        self.subtitles = data_path.with_suffix(".ass")
-        self.error_log = data_path.with_suffix(".txt")
+    def __post_init__(self):
+        self.event = self.data.with_suffix(".json")
+        self.danmaku = self.data.with_suffix(".xml")
+        self.burned = self.data.with_suffix(".mp4")
+        self.subtitles = self.data.with_suffix(".ass")
+        self.error_log = self.data.with_suffix(".txt")
 
     def __iter__(self) -> Iterator[Path]:
         yield from self.to_dict().values()

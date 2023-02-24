@@ -26,12 +26,8 @@ class BurnDanmakuTask(Task[BurnDanmakuTaskInput, BurnDanmakuTaskOutput]):
         event = Event(self.input.event_json)
         files = event.get_event_files()
 
-        self.danmaku_factory.convert(
-            str(files.danmaku), str(files.subtitles), *self.input.danmaku_factory_args
-        )
+        self.danmaku_factory.convert(str(files.danmaku), str(files.subtitles), *self.input.danmaku_factory_args)
 
-        self.ffmpeg.add_subtitles(
-            str(files.data), str(files.subtitles), str(files.burned)
-        )
+        self.ffmpeg.add_subtitles(str(files.data), str(files.subtitles), str(files.burned))
 
         return BurnDanmakuTaskOutput(event_json=self.input.event_json, skipped=False)

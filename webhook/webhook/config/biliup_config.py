@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field, InitVar
 from datetime import datetime
 from fnmatch import fnmatch
 from itertools import chain
@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 import yaml
+from boltons.iterutils import first
 
 from ..event import Event
 from ..util import DictionaryConvertible, filter_suffixes
@@ -13,7 +14,7 @@ from ..util import DictionaryConvertible, filter_suffixes
 BILIUP_CONFIG_DIR = Path("/etc/biliup")
 
 
-def custom_fmtstr(string: str, date: datetime, title: str, streamer: str):
+def custom_fmtstr(string: str, date: datetime, title: str, streamer: str) -> str:
     return (
         date.strftime(string.encode("unicode-escape").decode())
         .encode()
@@ -24,29 +25,27 @@ def custom_fmtstr(string: str, date: datetime, title: str, streamer: str):
 
 @dataclass
 class BiliupConfig(DictionaryConvertible):
-    line: Optional[str] = None
-    limit: Optional[int] = None
-    user_cookie: Path = BILIUP_CONFIG_DIR.joinpath("cookies.json")
-    copyright: Optional[int] = None
-    source: Optional[str] = None
-    tid: Optional[int] = None
-    cover: Optional[str] = None
-    title: Optional[str] = None
-    desc: Optional[str] = None
-    dynamic: Optional[str] = None
-    tag: Optional[str] = None
-    dtime: Optional[int] = None
-    dolby: Optional[int] = None
-    hires: Optional[int] = None
-    no_reprint: Optional[int] = None
-    open_elec: Optional[int] = None
+    line: Optional[str] = field(init=False)
+    limit: Optional[int] = field(init=False)
+    user_cookie: Path = field(init=False)
+    copyright: Optional[int] = field(init=False)
+    source: Optional[str] = field(init=False)
+    tid: Optional[int] = field(init=False)
+    cover: Optional[str] = field(init=False)
+    title: Optional[str] = field(init=False)
+    desc: Optional[str] = field(init=False)
+    dynamic: Optional[str] = field(init=False)
+    tag: Optional[str] = field(init=False)
+    dtime: Optional[int] = field(init=False)
+    dolby: Optional[int] = field(init=False)
+    hires: Optional[int] = field(init=False)
+    no_reprint: Optional[int] = field(init=False)
+    open_elec: Optional[int] = field(init=False)
+    event: InitVar[Event]
 
-    def __init__(self, event: Event):
+    def __post_init__(self, event: Event):
         config = dict()
-        config_path = next(
-            filter_suffixes(BILIUP_CONFIG_DIR.glob("config.*"), ".yml", ".yaml"),
-            None,
-        )
+        config_path = first(filter_suffixes(BILIUP_CONFIG_DIR.glob("config.*"), ".yml", ".yaml"))
         if config_path is not None:
             with open(config_path) as f:
                 config = yaml.safe_load(f)
@@ -54,61 +53,43 @@ class BiliupConfig(DictionaryConvertible):
         event_date = event.get_date()
         event_title = event.get_title()
         event_streamer = event.get_streamer()
-        streamer_data = next(
-            (
-                v
-                for k, v in config.get("streamers", dict()).items()
-                if fnmatch(event_streamer, k)
-            ),
-            dict(),
+        _, streamer_data = first(
+            config.get("streamers", dict()).items(),
+            default=(str(), dict()),
+            key=lambda item: fnmatch(event_streamer, item[0]),
         )
 
-        if line := config.get("line"):
-            self.line = line
-        if limit := config.get("limit"):
-            self.limit = limit
-        if user_cookie := streamer_data.get("user_cookie"):
-            # force resolve path since file is expected to exist.
-            self.user_cookie = BILIUP_CONFIG_DIR.joinpath(user_cookie).resolve(
-                strict=True
-            )
-        if copyright := streamer_data.get("copyright"):
-            self.copyright = copyright
-        if source := streamer_data.get("source"):
-            self.source = source
-        if tid := streamer_data.get("tid"):
-            self.tid = tid
-        if cover := streamer_data.get("cover"):
-            self.cover = cover
-        if title := streamer_data.get("title"):
-            self.title = custom_fmtstr(title, event_date, event_title, event_streamer)
-        if desc := streamer_data.get("desc"):
-            self.desc = custom_fmtstr(desc, event_date, event_title, event_streamer)
-        if dynamic := streamer_data.get("dynamic"):
-            self.dynamic = dynamic
-        if tag := streamer_data.get("tag"):
-            if isinstance(tag, list):
-                tag = ",".join(tag)
-            self.tag = tag
-        if dtime := streamer_data.get("dtime"):
-            self.dtime = dtime
-        if dolby := streamer_data.get("dolby"):
-            self.dolby = dolby
-        if hires := streamer_data.get("hires"):
-            self.hires = hires
-        if no_reprint := streamer_data.get("no_reprint"):
-            self.no_reprint = no_reprint
-        if open_elec := streamer_data.get("open_elec"):
-            self.open_elec = open_elec
+        self.line = config.get("line")
+        self.limit = config.get("limit")
+        self.user_cookie = (
+            BILIUP_CONFIG_DIR.joinpath(user_cookie).resolve(strict=True)
+            if (user_cookie := streamer_data.get("user_cookie"))
+            else BILIUP_CONFIG_DIR.joinpath("cookies.json")
+        )
+        self.copyright = streamer_data.get("copyright")
+        self.source = streamer_data.get("source")
+        self.tid = streamer_data.get("tid")
+        self.cover = streamer_data.get("cover")
+        self.title = (
+            custom_fmtstr(title, event_date, event_title, event_streamer)
+            if (title := streamer_data.get("title"))
+            else None
+        )
+        self.desc = (
+            custom_fmtstr(desc, event_date, event_title, event_streamer)
+            if (desc := streamer_data.get("desc"))
+            else None
+        )
+        self.dynamic = streamer_data.get("dynamic")
+        self.tag = (",".join(tag) if isinstance(tag, list) else tag) if (tag := streamer_data.get("tag")) else None
+        self.dtime = streamer_data.get("dtime")
+        self.dolby = streamer_data.get("dolby")
+        self.hires = streamer_data.get("hires")
+        self.no_reprint = streamer_data.get("no_reprint")
+        self.open_elec = streamer_data.get("open_elec")
 
     def to_command_args(self) -> list[str]:
         data = self.to_dict()
         data.pop("user_cookie")
 
-        return list(
-            chain.from_iterable(
-                [f"--{k.replace('_', '-')}", str(v)]
-                for k, v in data.items()
-                if v is not None
-            )
-        )
+        return list(chain.from_iterable([f"--{k.replace('_', '-')}", str(v)] for k, v in data.items() if v is not None))

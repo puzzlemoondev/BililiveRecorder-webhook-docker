@@ -31,10 +31,10 @@ class CloudStorageCommand(Command):
         if not self.remote_contains(local_path, remote_dir):
             raise AssertionError(f"{resolved_path} not uploaded to {self.executable}")
 
-    def has_account(self) -> int:
-        accounts = count_lines(self.loglist()) - 1  # subtracts header
+    def has_account(self) -> bool:
+        accounts = count_lines(self.loglist()) - 1
         return accounts > 0
 
-    def remote_contains(self, local_path: str, remote_dir: str):
+    def remote_contains(self, local_path: str, remote_dir: str) -> bool:
         remote_content = self.ls(remote_dir)
         return Path(local_path).name in remote_content
