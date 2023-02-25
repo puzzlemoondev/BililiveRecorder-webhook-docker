@@ -88,3 +88,5 @@ streamers:
 - [BaiduPCS-go](https://github.com/qjfoidnh/BaiduPCS-Go)
 - [aliyunpan](https://github.com/tickstep/aliyunpan)
 - [biliup-rs](https://github.com/ForgQi/biliup-rs)
+- [DanmakuFactory](https://github.com/hihkm/DanmakuFactory)
+- ffmpeg
