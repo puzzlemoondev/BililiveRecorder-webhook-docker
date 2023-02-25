@@ -22,6 +22,7 @@ The [webhook](https://github.com/adnanh/webhook) server listens for `FileClosed`
   - BURN_DANMAKU: pass 1 to turn danmaku burning on. This creates a separate video file with hardcoded danmaku.
   - DANMAKU_FACTORY_ARGS: args that controls the `.ass` subtitles generated from BiliveRecorder danmaku. See [DanmakuFactory](https://github.com/hihkm/DanmakuFactory) for args. `-i`, `-o` args should not be included. Font name is not necessary since only noto fonts are installed.
   - BILIBILI_UPLOAD_BURNED: pass 1 to upload video with danmaku instead of the original.
+  - REMOVE_LOCAL: pass 1 to remove local files after upload.
 - Run `docker compose up`
 - Add webhook to settings
   - Go to Settings -> Webhook -> Webhook V2
