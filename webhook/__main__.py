@@ -1,19 +1,17 @@
-import argparse
+import click
 
 from .composer import Composer
 from .config import Config
 from .event import Event
-from .util import ParseJSONAction
+from .util import JSON
 
 config = Config()
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("event", action=ParseJSONAction)
-    args = parser.parse_args()
-
-    event = Event(args.event)
+@click.command()
+@click.argument("event", type=JSON)
+def main(event: dict):
+    event = Event(event)
     event.save()
 
     composer = Composer(event, config)
