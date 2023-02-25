@@ -1,0 +1,13 @@
+name: Publish on release
+
+on:
+  release:
+    types:
+      - released
+
+jobs:
+  publish:
+    uses: ./.github/workflows/publish.yml
+    secrets: inherit
+    with:
+      tags: 'latest,${{ github.event.release.tag_name }}'

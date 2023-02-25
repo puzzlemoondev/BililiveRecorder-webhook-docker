@@ -2,12 +2,19 @@ name: Publish
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - 'main'
-    paths-ignore:
-      - '**.md'
-      - '.github/**'
+    inputs:
+      tags:
+        description: 'tags'
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      tags:
+        required: true
+        type: string
+
+env:
+  TAGS: ${{ (inputs || github.event.inputs).tags }}
 
 jobs:
   docker:
@@ -22,11 +29,27 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Prepare Tags
+        id: tags
+        uses: actions/github-script@v6
+        env:
+          tags: ${{ env.TAGS }}
+          separator: ','
+          imageName: puzzlemoondev/bililive-recorder-webhook
+        with:
+          result-encoding: string
+          script: |
+            const { tags, separator, imageName } = process.env
+            return tags
+              .replace(/\s+/g, '')
+              .split(separator)
+              .map((tag) => ''.concat(imageName, ':', tag))
+              .join(separator)
       - name: Build and push webhook
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           push: true
-          tags: puzzlemoondev/bililive-recorder-webhook:latest
+          tags: ${{ steps.tags.outputs.result }}
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           cache-from: type=registry,ref=puzzlemoondev/bililive-recorder-webhook:build-cache
           cache-to: type=registry,ref=puzzlemoondev/bililive-recorder-webhook:build-cache,mode=max

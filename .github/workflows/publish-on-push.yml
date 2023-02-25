@@ -1,0 +1,16 @@
+name: Publish on push
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths-ignore:
+      - '**.md'
+      - '.github/**'
+
+jobs:
+  publish:
+    uses: ./.github/workflows/publish.yml
+    secrets: inherit
+    with:
+      tags: edge
