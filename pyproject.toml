@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "webhook"
+version = "0.1.0"
+description = ""
+authors = ["PuzzleMoon <32855965+puzzlemoondev@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+boltons = "^23.0.0"
+celery = {extras = ["redis"], version = "^5.2.7"}
+flower = "^1.2.0"
+pyyaml = "^6.0"
+supervisor = "^4.2.5"
+
+[tool.black]
+line-length = 120
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

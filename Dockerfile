@@ -67,10 +67,10 @@ COPY --from=danmaku-factory-build /DanmakuFactory /usr/local/bin/
 RUN apk add --upgrade --no-cache redis ffmpeg font-noto font-noto-cjk font-noto-emoji
 RUN mkdir -p /var/supervisord /var/redis
 WORKDIR /webhook
-COPY ./webhook/requirements.txt .
+COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
-COPY ./webhook .
-COPY ./hooks.json /etc/
-COPY ./supervisord.conf /etc/
+COPY webhook webhook
+COPY hooks.json /etc/
+COPY supervisord.conf /etc/
 EXPOSE 5555 9001
 CMD ["supervisord", "-c", "/etc/supervisord.conf"]
