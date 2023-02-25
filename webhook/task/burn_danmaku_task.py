@@ -13,7 +13,8 @@ class BurnDanmakuTaskInput(Input):
 
 @dataclass
 class BurnDanmakuTaskOutput(Output):
-    event_json: dict
+    burned_path: str
+    subtitles_path: str
 
 
 class BurnDanmakuTask(Task[BurnDanmakuTaskInput, BurnDanmakuTaskOutput]):
@@ -30,4 +31,4 @@ class BurnDanmakuTask(Task[BurnDanmakuTaskInput, BurnDanmakuTaskOutput]):
 
         self.ffmpeg.add_subtitles(str(files.data), str(files.subtitles), str(files.burned))
 
-        return BurnDanmakuTaskOutput(event_json=self.input.event_json, skipped=False)
+        return BurnDanmakuTaskOutput(burned_path=str(files.burned), subtitles_path=str(files.subtitles), skipped=False)
