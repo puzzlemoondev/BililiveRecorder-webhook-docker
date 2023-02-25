@@ -6,8 +6,19 @@ on:
       - released
 
 jobs:
+  prepare-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.strip.outputs.tag }}
+    steps:
+      - name: Strip Prefix
+        id: strip
+        run: |
+          TAG=${{ github.event.release.tag_name }}
+          echo "tag=${TAG#v}" >> $GITHUB_OUTPUT
   publish:
+    needs: [ prepare-tag ]
     uses: ./.github/workflows/publish.yml
     secrets: inherit
     with:
-      tags: 'latest,${{ github.event.release.tag_name }}'
+      tags: 'latest,${{ needs.prepare-tag.outputs.tag }}'

@@ -45,7 +45,7 @@ jobs:
               .split(separator)
               .map((tag) => ''.concat(imageName, ':', tag))
               .join(separator)
-      - name: Build and push webhook
+      - name: Build and Push Webhook
         uses: docker/build-push-action@v4
         with:
           push: true
