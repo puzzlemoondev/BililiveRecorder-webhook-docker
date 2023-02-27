@@ -1,3 +1,4 @@
+import shlex
 from pathlib import Path
 
 from .command import Command
@@ -15,7 +16,7 @@ class FFMPEGCommand(Command):
             "-i",
             source,
             "-vf",
-            f"ass={subtitles}",
+            shlex.quote(f"ass={subtitles}"),
             "-c:a",
             "copy",
             output,
