@@ -19,24 +19,24 @@ after upload success.
 - Add a [`.env` file](https://docs.docker.com/compose/environment-variables/#the-env-file) with these variables. For
   baidupcs, provide both bduss and stoken. For aliyunpan, provide rtoken. Providing credentials for both platform at the
   same time triggers upload to both platform concurrently.
-    - RECORDER_USER: username for BiliveRecorder
-    - RECORDER_PASS: password for BiliveRecorder
-    - BAIDUPCS_BDUSS: bduss for baidupcs login.
-      See [baidupcs](https://github.com/qjfoidnh/BaiduPCS-Go#%E7%99%BB%E5%BD%95%E7%99%BE%E5%BA%A6%E5%B8%90%E5%8F%B7) for
-      how to retrieve.
-    - BAIDUPCS_STOKEN: stoken for baidupcs login.
-      See [baidupcs](https://github.com/qjfoidnh/BaiduPCS-Go#%E7%99%BB%E5%BD%95%E7%99%BE%E5%BA%A6%E5%B8%90%E5%8F%B7) for
-      how to retrieve.
-    - ALIYUNPAN_RTOKEN: refresh token for aliyunpan login.
-      See [aliyunpan](https://github.com/tickstep/aliyunpan#%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96RefreshToken) for how to
-      retrieve.
-    - BURN_DANMAKU: pass 1 to turn danmaku burning on. This creates a separate video file with hardcoded danmaku.
-    - BILIBILI_UPLOAD_BURNED: pass 1 to upload video with danmaku instead of the original.
-    - REMOVE_LOCAL: pass 1 to remove local files after upload.
+  - RECORDER_USER: username for BiliveRecorder
+  - RECORDER_PASS: password for BiliveRecorder
+  - BAIDUPCS_BDUSS: bduss for baidupcs login.
+    See [baidupcs](https://github.com/qjfoidnh/BaiduPCS-Go#%E7%99%BB%E5%BD%95%E7%99%BE%E5%BA%A6%E5%B8%90%E5%8F%B7) for
+    how to retrieve.
+  - BAIDUPCS_STOKEN: stoken for baidupcs login.
+    See [baidupcs](https://github.com/qjfoidnh/BaiduPCS-Go#%E7%99%BB%E5%BD%95%E7%99%BE%E5%BA%A6%E5%B8%90%E5%8F%B7) for
+    how to retrieve.
+  - ALIYUNPAN_RTOKEN: refresh token for aliyunpan login.
+    See [aliyunpan](https://github.com/tickstep/aliyunpan#%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96RefreshToken) for how to
+    retrieve.
+  - BURN_DANMAKU: pass 1 to turn danmaku burning on. This creates a separate video file with hardcoded danmaku.
+  - BILIBILI_UPLOAD_BURNED: pass 1 to upload video with danmaku instead of the original.
+  - REMOVE_LOCAL: pass 1 to remove local files after upload.
 - Run `docker compose up`
 - Add webhook to settings
-    - Go to Settings -> Webhook -> Webhook V2
-    - Add this line: `http://localhost:9000/hooks/recorder-file-closed`
+  - Go to Settings -> Webhook -> Webhook V2
+  - Add this line: `http://localhost:9000/hooks/recorder-file-closed`
 
 ## Biliup Integration
 
@@ -46,12 +46,6 @@ after upload success.
   fields. `title` and `desc` supports string interpolation. Run `biliup upload --help` to see default values.
 - If you have multiple bilibili accounts, put all their cookies json inside `/etc/biliup` and specify their name in your
   config yaml.
-
-## DanmakuFactory Integration
-
-- To use DanmakuFactory, add your `DanmakuFactoryConfig.json` under `DanmakuFactory`. If not, default values will be
-  used. This directory will be mounted to `/etc/DanmakuFactory` in the container.
-- For config file format, visit https://github.com/hihkm/DanmakuFactory
 
 ### Sample `config.yml`
 
@@ -93,6 +87,40 @@ streamers:
     hires: 0
     no_reprint: 1
     open_elec: 0
+```
+
+## DanmakuFactory Integration
+
+- To use DanmakuFactory, add your `DanmakuFactoryConfig.json` under `DanmakuFactory`. If not, default values will be
+  used. This directory will be mounted to `/etc/DanmakuFactory` in the container.
+
+### Sample `DanmakuFactoryConfig.json`
+
+This is the default config file from https://github.com/hihkm/DanmakuFactory
+
+```
+{
+    "resolution": [1920, 1080],
+    "scrolltime": 12.000000,
+    "fixtime": 5.000000,
+    "density": 0,
+    "fontname": "Microsoft YaHei",
+    "fontsize": 38,
+    "opacity": 180,
+    "outline": 0,
+    "shadow": 1,
+    "displayArea": 1.000000,
+    "scrollArea": 1.000000,
+    "bold": true,
+    "showUsernames": true,
+    "showMsgbox": true,
+    "msgboxSize": [500, 1080],
+    "msgboxPos": [20, 0],
+    "msgboxFontsize": 38,
+    "giftMinPrice": 0.00,
+    "blockmode": [],
+    "statmode": []
+}
 ```
 
 ## Monitoring
