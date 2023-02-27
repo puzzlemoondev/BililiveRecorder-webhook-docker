@@ -8,7 +8,6 @@ services:
     volumes:
       - ./rec:/rec
       - ./biliup:/etc/biliup
-      - ./DanmakuFactory:/etc/DanmakuFactory
     environment:
       - RECORDER_USER
       - RECORDER_PASS

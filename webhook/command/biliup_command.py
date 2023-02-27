@@ -7,7 +7,8 @@ class BiliupCommand(Command):
         self.user_cookie = user_cookie
 
     def __call__(self, *args) -> str:
-        return super().__call__("-u", self.user_cookie, *args)
+        args_with_user_cookie = ["-u", self.user_cookie, *args]
+        return super().__call__(*args_with_user_cookie)
 
     def renew(self) -> str:
         return self("renew")
