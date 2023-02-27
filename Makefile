@@ -15,6 +15,8 @@ update:
 	chmod +x update.sh
 	./update.sh
 local:
-	sd latest local compose.yml
-remote:
-	sd local latest compose.yml
+	sd 'latest|edge' local compose.yml
+latest:
+	sd 'local|edge' latest compose.yml
+edge:
+	sd 'local|latest' edge compose.yml
