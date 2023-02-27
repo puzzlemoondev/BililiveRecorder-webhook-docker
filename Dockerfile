@@ -1,25 +1,15 @@
-FROM alpine AS build-go
-RUN apk add --upgrade --no-cache wget musl-dev go
+FROM golang AS build-go
 WORKDIR /build
 
-FROM --platform=$BUILDPLATFORM alpine AS build-rust-source
-RUN apk add --upgrade --no-cache wget musl-dev cargo
+FROM --platform=$BUILDPLATFORM rust AS build-rust-source
 WORKDIR /source
 RUN mkdir .cargo
 
-FROM alpine AS build-rust
-RUN apk add --upgrade --no-cache musl-dev cargo
+FROM rust AS build-rust
 WORKDIR /build
 
-FROM alpine AS build-c
-RUN apk add --upgrade --no-cache wget musl-dev gcc make
+FROM gcc AS build-c
 WORKDIR /build
-
-FROM build-go AS webhook-build
-ENV WEBHOOK_VERSION 2.8.0
-RUN wget https://github.com/adnanh/webhook/archive/refs/tags/${WEBHOOK_VERSION}.tar.gz -O webhook.tar.gz && \
-    tar -xzf webhook.tar.gz --strip 1 && \
-    go build -o /webhook
 
 FROM build-go AS aliyunpan-build
 ENV ALIYUNPAN_VERSION 0.2.5
@@ -51,20 +41,37 @@ RUN wget https://github.com/hihkm/DanmakuFactory/archive/refs/tags/v${DANMAKU_FA
     make && \
     cp DanmakuFactory /DanmakuFactory
 
-FROM python:alpine as recorder
-RUN apk add --upgrade --no-cache aspnetcore6-runtime tzdata
+FROM python:slim as recorder
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends wget && \
+    wget https://dot.net/v1/dotnet-install.sh && \
+    chmod +x dotnet-install.sh && \
+    ./dotnet-install.sh -c 6.0 --runtime aspnetcore --install-dir /usr/local/bin && \
+    apt-get purge -y --autoremove wget && \
+    rm -rf dotnet-install.sh \
+      /var/lib/apt/lists/*  \
+      /tmp/*
 ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone
 WORKDIR /recorder
 COPY --from=bililive/recorder:2.6.2 /app .
 EXPOSE 2356
 
 FROM recorder as webhook
-COPY --from=webhook-build /webhook /usr/local/bin/
 COPY --from=aliyunpan-build /aliyunpan /usr/local/bin/
 COPY --from=baidupcs-build /baidupcs /usr/local/bin/
 COPY --from=biliup-build /biliup /usr/local/bin/
 COPY --from=danmaku-factory-build /DanmakuFactory /usr/local/bin/
-RUN apk add --upgrade --no-cache redis ffmpeg font-noto font-noto-cjk font-noto-emoji
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    webhook \
+    redis-server \
+    ffmpeg \
+    fonts-noto \
+    fonts-noto-cjk \
+    fonts-noto-color-emoji && \
+    rm -rf /var/lib/apt/lists/*
 RUN mkdir -p /var/supervisord /var/redis
 WORKDIR /webhook
 COPY requirements.txt ./
