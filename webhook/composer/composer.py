@@ -147,7 +147,6 @@ class Composer:
 
         input = BurnDanmakuTaskInput(
             event_json=self.event.data,
-            danmaku_factory_args=self.config.danmaku_factory_args,
         )
         return burn_danmaku.si(input.to_dict())
 
