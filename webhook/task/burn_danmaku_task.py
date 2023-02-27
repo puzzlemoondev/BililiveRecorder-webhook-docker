@@ -8,6 +8,7 @@ from ..event import Event
 @dataclass
 class BurnDanmakuTaskInput(Input):
     event_json: dict
+    danmaku_factory_args: list[str]
 
 
 @dataclass
@@ -26,7 +27,7 @@ class BurnDanmakuTask(Task[BurnDanmakuTaskInput, BurnDanmakuTaskOutput]):
         event = Event(self.input.event_json)
         files = event.get_event_files()
 
-        self.danmaku_factory.convert(str(files.danmaku), str(files.subtitles))
+        self.danmaku_factory.convert(str(files.danmaku), str(files.subtitles), *self.input.danmaku_factory_args)
 
         self.ffmpeg.add_subtitles(str(files.data), str(files.subtitles), str(files.burned))
 
