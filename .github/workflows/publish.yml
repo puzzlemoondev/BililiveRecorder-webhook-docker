@@ -45,11 +45,11 @@ jobs:
               .split(separator)
               .map((tag) => ''.concat(imageName, ':', tag))
               .join(separator)
-      - name: Build and Push Webhook
+      - name: Build and Push
         uses: docker/build-push-action@v4
         with:
           push: true
           tags: ${{ steps.tags.outputs.result }}
           platforms: linux/amd64,linux/arm/v7,linux/arm64
-          cache-from: type=registry,ref=puzzlemoondev/bililive-recorder-webhook:build-cache
-          cache-to: type=registry,ref=puzzlemoondev/bililive-recorder-webhook:build-cache,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
