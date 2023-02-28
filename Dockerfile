@@ -47,6 +47,11 @@ RUN npm install ffmpeg-static && \
     echo "console.log(require('ffmpeg-static'))" > ffmpeg-static.js && \
     cp "$(node ffmpeg-static.js)" /ffmpeg
 
+FROM scratch AS fonts
+ENV GO_NOTO_UNIVERSAL_VERSION 5.3
+WORKDIR /fonts
+ADD https://github.com/satbyy/go-noto-universal/releases/download/v${GO_NOTO_UNIVERSAL_VERSION}/GoNotoCJKCore.ttf .
+
 FROM python:slim as recorder
 RUN apt-get update && \
     apt-get install -y --no-install-recommends wget && \
@@ -70,14 +75,11 @@ COPY --from=baidupcs-build /baidupcs /usr/local/bin/
 COPY --from=biliup-build /biliup /usr/local/bin/
 COPY --from=danmaku-factory-build /DanmakuFactory /usr/local/bin/
 COPY --from=ffmpeg-build /ffmpeg /usr/local/bin/
+COPY --from=fonts /fonts /usr/local/share/fonts
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    webhook \
-    redis-server \
-    fonts-noto \
-    fonts-noto-cjk \
-    fonts-noto-color-emoji && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y --no-install-recommends webhook redis-server font-config && \
+    rm -rf /var/lib/apt/lists/* && \
+    fc-cache -f
 RUN mkdir -p /var/supervisord /var/redis
 WORKDIR /webhook
 COPY requirements.txt ./
