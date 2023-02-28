@@ -41,6 +41,12 @@ RUN wget https://github.com/hihkm/DanmakuFactory/archive/refs/tags/v${DANMAKU_FA
     make && \
     cp DanmakuFactory /DanmakuFactory
 
+FROM node AS ffmpeg-build
+WORKDIR /build
+RUN npm install ffmpeg-static && \
+    echo "console.log(require('ffmpeg-static'))" > ffmpeg-static.js && \
+    cp "$(node ffmpeg-static.js)" /ffmpeg
+
 FROM python:slim as recorder
 RUN apt-get update && \
     apt-get install -y --no-install-recommends wget && \
@@ -63,11 +69,11 @@ COPY --from=aliyunpan-build /aliyunpan /usr/local/bin/
 COPY --from=baidupcs-build /baidupcs /usr/local/bin/
 COPY --from=biliup-build /biliup /usr/local/bin/
 COPY --from=danmaku-factory-build /DanmakuFactory /usr/local/bin/
+COPY --from=ffmpeg-build /ffmpeg /usr/local/bin/
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     webhook \
     redis-server \
-    ffmpeg \
     fonts-noto \
     fonts-noto-cjk \
     fonts-noto-color-emoji && \
