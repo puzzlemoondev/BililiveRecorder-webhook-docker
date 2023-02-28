@@ -1,13 +1,6 @@
 FROM golang AS build-go
 WORKDIR /build
 
-FROM --platform=$BUILDPLATFORM rust AS build-rust-source
-WORKDIR /source
-RUN mkdir .cargo
-
-FROM rust AS build-rust
-WORKDIR /build
-
 FROM gcc AS build-c
 WORKDIR /build
 
@@ -22,17 +15,6 @@ ENV BAIDUPCS_VERSION 3.9.0
 RUN wget https://github.com/qjfoidnh/BaiduPCS-Go/archive/refs/tags/v${BAIDUPCS_VERSION}.tar.gz -O baidupcs.tar.gz && \
     tar -xzf baidupcs.tar.gz --strip 1 && \
     go build -o /baidupcs
-
-FROM build-rust-source AS biliup-source
-ENV BILIUP_VERSION 0.1.15
-RUN wget https://github.com/ForgQi/biliup-rs/archive/refs/tags/v${BILIUP_VERSION}.tar.gz -O biliup.tar.gz && \
-    tar -xzf biliup.tar.gz --strip 1 && \
-    cargo vendor > .cargo/config
-
-FROM build-rust AS biliup-build
-COPY --from=biliup-source /source /build
-RUN cargo build --release --offline --bin biliup && \
-    cp target/release/biliup /biliup
 
 FROM build-c AS danmaku-factory-build
 ENV DANMAKU_FACTORY_VERSION 1.63
@@ -61,8 +43,8 @@ EXPOSE 2356
 FROM recorder as webhook
 COPY --from=aliyunpan-build /aliyunpan /usr/local/bin/
 COPY --from=baidupcs-build /baidupcs /usr/local/bin/
-COPY --from=biliup-build /biliup /usr/local/bin/
 COPY --from=danmaku-factory-build /DanmakuFactory /usr/local/bin/
+COPY --from=puzzlemoondev/biliup-rs /biliup /usr/local/bin/
 COPY --from=puzzlemoondev/ffmpeg-static /ffmpeg /usr/local/bin/
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
