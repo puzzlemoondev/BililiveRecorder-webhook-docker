@@ -63,29 +63,8 @@ class Composer:
     ) -> Signature:
         return group(
             [
-                chord(
-                    [
-                        self.get_upload_bilibili_and_cloud_signature(files.data, remove_after=False),
-                        self.get_upload_cloud_signature(files.danmaku, remove_after=False),
-                        chain(
-                            burn_danmaku_signature,
-                            group(
-                                [
-                                    self.get_upload_cloud_signature(files.burned),
-                                    self.get_upload_cloud_signature(files.subtitles),
-                                ]
-                            ),
-                        ),
-                    ],
-                    group(
-                        compact(
-                            [
-                                self.get_remove_signature(files.data),
-                                self.get_remove_signature(files.danmaku),
-                            ]
-                        )
-                    ),
-                ),
+                self.get_upload_bilibili_and_cloud_signature(files.data, remove_after=False),
+                self.get_upload_cloud_signature(files.danmaku, remove_after=False),
                 *(
                     self.get_upload_cloud_signature(path)
                     for path in IndexedSet(files).iter_difference(
@@ -96,6 +75,19 @@ class Composer:
                             files.danmaku,
                         }
                     )
+                ),
+                chain(
+                    burn_danmaku_signature,
+                    group(
+                        compact(
+                            [
+                                self.get_remove_signature(files.data),
+                                self.get_remove_signature(files.danmaku),
+                                self.get_upload_cloud_signature(files.burned),
+                                self.get_upload_cloud_signature(files.subtitles),
+                            ]
+                        )
+                    ),
                 ),
             ]
         )
