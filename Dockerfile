@@ -5,7 +5,7 @@ FROM gcc AS build-c
 WORKDIR /build
 
 FROM build-go AS aliyunpan-build
-ENV ALIYUNPAN_VERSION 0.2.5
+ENV ALIYUNPAN_VERSION 0.2.6
 RUN wget https://github.com/tickstep/aliyunpan/archive/refs/tags/v${ALIYUNPAN_VERSION}.tar.gz -O aliyunpan.tar.gz && \
     tar -xzf aliyunpan.tar.gz --strip 1 && \
     go build -o /aliyunpan
