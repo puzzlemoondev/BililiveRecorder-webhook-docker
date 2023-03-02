@@ -8,4 +8,4 @@ class BaidupcsCommand(CloudStorageCommand):
         self.stoken = stoken
 
     def login(self) -> str:
-        return super().login("-bduss", self.bduss, "-stoken", self.stoken)
+        return self("-bduss", self.bduss, "-stoken", self.stoken)
