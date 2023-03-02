@@ -7,4 +7,4 @@ class AliyunpanCommand(CloudStorageCommand):
         self.rtoken = rtoken
 
     def login(self) -> str:
-        return super().login("-RefreshToken", self.rtoken)
+        return self("-RefreshToken", self.rtoken)
