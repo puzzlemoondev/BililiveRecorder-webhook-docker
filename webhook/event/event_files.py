@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterator
+
+from boltons.setutils import IndexedSet
 
 from ..util import DictionaryConvertible
 
@@ -21,5 +22,11 @@ class EventFiles(DictionaryConvertible):
         self.subtitles = self.data.with_suffix(".ass")
         self.error_log = self.data.with_suffix(".txt")
 
-    def __iter__(self) -> Iterator[Path]:
-        yield from self.to_dict().values()
+    def get_files(self) -> IndexedSet[Path]:
+        return IndexedSet(self.to_dict().values())
+
+    def get_burn_files(self) -> IndexedSet[Path]:
+        return IndexedSet([self.burned, self.subtitles])
+
+    def get_burn_dependencies(self) -> IndexedSet[Path]:
+        return IndexedSet([self.data, self.danmaku])
