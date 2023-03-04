@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Optional, Callable, Iterator
 
-from boltons.setutils import IndexedSet
 from celery.canvas import chain, chord, group, Signature
 
 from ..config import Config, BiliupConfig
@@ -32,76 +31,77 @@ class Composer:
         files = self.event.get_event_files()
 
         if burn_danmaku_signature := self.get_burn_danmaku_signature():
+            burn_danmaku_signature = self.get_burn_danmaku_remove_on_error_signature(files, burn_danmaku_signature)
             if self.config.bilibili_upload_burned:
                 return self.get_burn_danmaku_upload_bilibili_upload_cloud_signature(files, burn_danmaku_signature)
             return self.get_upload_bilibili_burn_danmaku_upload_cloud_signature(files, burn_danmaku_signature)
         return self.get_upload_bilibili_upload_cloud_signature(files)
 
+    def get_burn_danmaku_remove_on_error_signature(
+        self, files: EventFiles, burn_danmaku_signature: Signature
+    ) -> Signature:
+        return burn_danmaku_signature.on_error(self.get_batch_remove_signature(files.burned, files.subtitles))
+
     def get_burn_danmaku_upload_bilibili_upload_cloud_signature(
         self, files: EventFiles, burn_danmaku_signature: Signature
     ) -> Signature:
-        return group(
-            [
-                chain(
-                    burn_danmaku_signature,
-                    group(
-                        [
-                            self.get_upload_bilibili_and_cloud_signature(files.burned),
-                            self.get_upload_cloud_signature(files.subtitles),
-                        ]
-                    ),
-                ),
-                *(
-                    self.get_upload_cloud_signature(path)
-                    for path in IndexedSet(files).iter_difference({files.burned, files.subtitles})
-                ),
-            ]
+        burn_files = files.get_burn_files()
+        burn_dependencies = files.get_burn_dependencies()
+
+        def upload_signature(path: Path) -> Signature:
+            remove_after = path not in burn_dependencies
+            return self.get_upload_cloud_signature(path, remove_after=remove_after)
+
+        upload_signatures = map(upload_signature, files.get_files() - burn_files)
+
+        burn_upload_signature = chain(
+            burn_danmaku_signature,
+            group(
+                [
+                    self.get_upload_bilibili_and_cloud_signature(files.burned),
+                    self.get_upload_cloud_signature(files.subtitles),
+                ]
+            ),
         )
+
+        remove_dangling_signature = self.get_batch_remove_signature(*burn_dependencies)
+
+        return chord([burn_upload_signature, *upload_signatures], remove_dangling_signature)
 
     def get_upload_bilibili_burn_danmaku_upload_cloud_signature(
         self, files: EventFiles, burn_danmaku_signature: Signature
     ) -> Signature:
-        return group(
-            [
-                self.get_upload_bilibili_and_cloud_signature(files.data, remove_after=False),
-                self.get_upload_cloud_signature(files.danmaku, remove_after=False),
-                *(
-                    self.get_upload_cloud_signature(path)
-                    for path in IndexedSet(files).iter_difference(
-                        {
-                            files.burned,
-                            files.subtitles,
-                            files.data,
-                            files.danmaku,
-                        }
-                    )
-                ),
-                chain(
-                    burn_danmaku_signature,
-                    group(
-                        compact(
-                            [
-                                self.get_remove_signature(files.data),
-                                self.get_remove_signature(files.danmaku),
-                                self.get_upload_cloud_signature(files.burned),
-                                self.get_upload_cloud_signature(files.subtitles),
-                            ]
-                        )
-                    ),
-                ),
-            ]
+        burn_files = files.get_burn_files()
+        burn_dependencies = files.get_burn_dependencies()
+
+        def upload_signature(path: Path) -> Signature:
+            remove_after = path not in burn_dependencies
+            if path == files.data:
+                return self.get_upload_bilibili_and_cloud_signature(path, remove_after=remove_after)
+            return self.get_upload_cloud_signature(path, remove_after=remove_after)
+
+        upload_signatures = map(upload_signature, files.get_files() - burn_files)
+
+        burn_upload_signature = chain(
+            burn_danmaku_signature,
+            group(map(self.get_upload_cloud_signature, burn_files)),
         )
 
+        remove_dangling_signature = self.get_batch_remove_signature(*burn_dependencies)
+
+        return chord([*upload_signatures, burn_upload_signature], remove_dangling_signature)
+
     def get_upload_bilibili_upload_cloud_signature(self, files: EventFiles) -> Signature:
-        return group(
-            [
-                self.get_upload_bilibili_and_cloud_signature(files.data),
-                *(
-                    self.get_upload_cloud_signature(path)
-                    for path in IndexedSet(files).iter_difference({files.burned, files.subtitles, files.data})
-                ),
-            ]
-        )
+        burn_files = files.get_burn_files()
+
+        def upload_signature(path: Path) -> Signature:
+            if path == files.data:
+                return self.get_upload_bilibili_and_cloud_signature(path)
+            return self.get_upload_cloud_signature(path)
+
+        upload_signatures = map(upload_signature, files.get_files() - burn_files)
+
+        return group(upload_signatures)
 
     def get_upload_bilibili_and_cloud_signature(self, path: Path, remove_after: bool = True) -> Signature:
         def signatures_builder(_path: Path):
@@ -132,6 +132,9 @@ class Composer:
         if remove_after and (remove_signature := self.get_remove_signature(path)):
             return chord(signatures, remove_signature)
         return group(signatures)
+
+    def get_batch_remove_signature(self, *paths: Path) -> Signature:
+        return group(compact(map(self.get_remove_signature, paths)))
 
     def get_burn_danmaku_signature(self) -> Optional[Signature]:
         if not self.config.burn_danmaku:
