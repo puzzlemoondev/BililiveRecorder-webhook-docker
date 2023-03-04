@@ -92,14 +92,12 @@ class Composer:
         return chord([*upload_signatures, burn_upload_signature], remove_dangling_signature)
 
     def get_upload_bilibili_upload_cloud_signature(self, files: EventFiles) -> Signature:
-        burn_files = files.get_burn_files()
-
         def upload_signature(path: Path) -> Signature:
             if path == files.data:
                 return self.get_upload_bilibili_and_cloud_signature(path)
             return self.get_upload_cloud_signature(path)
 
-        upload_signatures = map(upload_signature, files.get_files() - burn_files)
+        upload_signatures = map(upload_signature, files.get_files())
 
         return group(upload_signatures)
 
