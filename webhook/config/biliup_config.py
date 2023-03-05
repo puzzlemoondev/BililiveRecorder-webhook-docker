@@ -11,7 +11,7 @@ from boltons.iterutils import first
 from ..event import Event
 from ..util import DictionaryConvertible
 
-BILIUP_CONFIG_DIR = Path("/etc/biliup").resolve(strict=True)
+BILIUP_CONFIG_DIR = Path("/etc/biliup").resolve()
 
 
 def custom_fmtstr(string: str, date: datetime, title: str, streamer: str) -> str:
