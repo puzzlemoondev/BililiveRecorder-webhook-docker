@@ -1,4 +1,4 @@
-.PHONY: build local
+.PHONY: down up
 
 up:
 	docker-compose up --build --detach
