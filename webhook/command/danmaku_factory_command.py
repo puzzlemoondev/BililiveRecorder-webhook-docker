@@ -2,7 +2,7 @@ from pathlib import Path
 
 from .command import Command
 
-DANMAKU_FACTORY_CONFIG_DIR = Path("/etc/DanmakuFactory").resolve(strict=True)
+DANMAKU_FACTORY_CONFIG_DIR = Path("/etc/DanmakuFactory").resolve()
 
 
 class DanmakuFactoryCommand(Command):
