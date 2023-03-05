@@ -1,5 +1,6 @@
 # BililiveRecorder-webhook-docker
 
+[![Test](https://github.com/puzzlemoondev/BililiveRecorder-webhook-docker/actions/workflows/test.yml/badge.svg)](https://github.com/puzzlemoondev/BililiveRecorder-webhook-docker/actions/workflows/test.yml)
 [![Publish](https://github.com/puzzlemoondev/BililiveRecorder-webhook-docker/actions/workflows/publish.yml/badge.svg)](https://github.com/puzzlemoondev/BililiveRecorder-webhook-docker/actions/workflows/publish.yml)
 [![Docker Image Version (latest semver)](https://img.shields.io/docker/v/puzzlemoondev/bililive-recorder-webhook?sort=semver)](https://hub.docker.com/r/puzzlemoondev/bililive-recorder-webhook)
 [![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/puzzlemoondev/bililive-recorder-webhook?sort=semver)](https://hub.docker.com/r/puzzlemoondev/bililive-recorder-webhook)
