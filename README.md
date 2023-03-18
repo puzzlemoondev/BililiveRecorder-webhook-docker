@@ -13,6 +13,19 @@ after upload success.
 
 [B 站专栏](https://www.bilibili.com/read/cv21367565)
 
+## Why
+
+- Parallelism (`celery` task queue)
+- Lightweight enough to run on t2.micro
+- Real time service & task monitoring and management (using `supervisor` & `flower`)
+
+## Why not
+
+- No GUI for configuration
+- No GPU acceleration for `ffmpeg` tasks
+- Multiple services in a docker container (to keep memory footprint low)
+- Python
+
 ## How to use
 
 > ⚠️ DO NOT TURN BURN_DANMAKU ON if your machine is low on resource.
