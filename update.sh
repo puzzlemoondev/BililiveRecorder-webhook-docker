@@ -10,13 +10,13 @@ pretty_printf() {
 }
 
 pretty_printf "stopping running containers..."
-docker-compose down
+docker compose down
 
 pretty_printf "pulling changes from git..."
 git pull --rebase --autostash --tags
 
 pretty_printf "pulling changes from docker..."
-docker-compose pull
+docker compose pull
 
 pretty_printf "starting containers..."
-docker-compose up --detach
+docker compose up --detach
