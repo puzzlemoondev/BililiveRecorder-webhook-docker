@@ -41,6 +41,7 @@ after upload success.
   - BAIDUPCS_STOKEN: stoken for baidupcs login.
     See [baidupcs](https://github.com/qjfoidnh/BaiduPCS-Go#%E7%99%BB%E5%BD%95%E7%99%BE%E5%BA%A6%E5%B8%90%E5%8F%B7) for
     how to retrieve.
+  - BAIDUPCS_MAX_UPLOAD_PARALLEL: parallel upload setting for SVIP user. Max 100.
   - ALIYUNPAN_RTOKEN: refresh token for aliyunpan login.
     See [aliyunpan](https://github.com/tickstep/aliyunpan#%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96RefreshToken) for how to
     retrieve.

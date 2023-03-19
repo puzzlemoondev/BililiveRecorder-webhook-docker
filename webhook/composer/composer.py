@@ -164,9 +164,7 @@ class Composer:
     def get_upload_baidupcs_signature(self, path: Path) -> Optional[Signature]:
         if (bduss := self.config.baidupcs_bduss) and (stoken := self.config.baidupcs_stoken):
             input = UploadBaidupcsTaskInput(
-                bduss=bduss,
-                stoken=stoken,
-                path=str(path),
+                path=str(path), bduss=bduss, stoken=stoken, max_upload_parallel=self.config.baidupcs_max_upload_parallel
             )
             return upload_baidupcs.si(input.to_dict())
 

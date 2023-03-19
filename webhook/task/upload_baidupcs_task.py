@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
 from .task import Task, Input, Output
 from ..command import BaidupcsCommand
@@ -7,9 +8,10 @@ from ..command import BaidupcsCommand
 
 @dataclass
 class UploadBaidupcsTaskInput(Input):
+    path: str
     bduss: str
     stoken: str
-    path: str
+    max_upload_parallel: Optional[str]
 
 
 @dataclass
@@ -20,7 +22,9 @@ class UploadBaidupcsTaskOutput(Output):
 class UploadBaidupcsTask(Task[UploadBaidupcsTaskInput, UploadBaidupcsTaskOutput]):
     def __init__(self, input: UploadBaidupcsTaskInput):
         super().__init__(input)
-        self.baidupcs = BaidupcsCommand(bduss=self.input.bduss, stoken=self.input.stoken)
+        self.baidupcs = BaidupcsCommand(
+            bduss=self.input.bduss, stoken=self.input.stoken, max_upload_parallel=self.input.max_upload_parallel
+        )
 
     def run(self) -> UploadBaidupcsTaskOutput:
         exists = Path(self.input.path).exists()
