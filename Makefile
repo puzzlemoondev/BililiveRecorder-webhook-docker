@@ -1,11 +1,11 @@
 .PHONY: down up
 
 up:
-	docker-compose up --build --detach
+	docker compose up --build --detach
 exec:
-	docker-compose exec webhook sh
+	docker compose exec webhook sh
 down:
-	docker-compose down
+	docker compose down
 reup: down up
 update:
 	chmod +x update.sh
