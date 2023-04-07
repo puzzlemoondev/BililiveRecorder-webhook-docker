@@ -1,9 +1,10 @@
 from pathlib import Path
 from typing import Optional, Callable, Iterator
 
+from boltons.iterutils import first
 from celery.canvas import chain, chord, group, Signature
 
-from ..config import Config, BiliupConfig
+from ..config import Config, BILIUP_CONFIG_DIR
 from ..event import Event, EventFiles
 from ..task import (
     BurnDanmakuTaskInput,
@@ -19,7 +20,7 @@ from ..tasks import (
     upload_bilibili,
     remove,
 )
-from ..util import compact
+from ..util import compact, filter_suffixes
 
 
 class Composer:
@@ -144,14 +145,13 @@ class Composer:
         return burn_danmaku.si(input.to_dict())
 
     def get_upload_bilibili_signature(self, path: Path) -> Optional[Signature]:
-        biliup_config = BiliupConfig(self.event)
-        user_cookie = biliup_config.user_cookie
-        if not user_cookie.exists():
+        config_path = first(filter_suffixes(BILIUP_CONFIG_DIR.glob("config.*"), ".yml", ".yaml"))
+        if not config_path.exists():
             return
 
         input = UploadBilibiliTaskInput(
             event_json=self.event.data,
-            user_cookie=str(user_cookie),
+            config_path=str(config_path),
             path=str(path),
         )
         return upload_bilibili.si(input.to_dict())
