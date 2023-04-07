@@ -10,7 +10,7 @@ from ..event import Event
 @dataclass
 class UploadBilibiliTaskInput(Input):
     event_json: dict
-    user_cookie: str
+    config_path: str
     path: str
 
 
@@ -22,15 +22,32 @@ class UploadBilibiliTaskOutput(Output):
 class UploadBilibiliTask(Task[UploadBilibiliTaskInput, UploadBilibiliTaskOutput]):
     def __init__(self, input: UploadBilibiliTaskInput):
         super().__init__(input)
-        self.biliup = BiliupCommand(self.input.user_cookie)
+        self._event = None
+        self._config = None
+        self._biliup = None
+
+    @property
+    def event(self) -> Event:
+        if self._event is None:
+            self._event = Event(self.input.event_json)
+        return self._event
+
+    @property
+    def config(self) -> BiliupConfig:
+        if self._config is None:
+            self._config = BiliupConfig(self.event, Path(self.input.config_path))
+        return self._config
+
+    @property
+    def biliup(self) -> BiliupCommand:
+        if self._biliup is None:
+            self._biliup = BiliupCommand(str(self.config.user_cookie))
+        return self._biliup
 
     def run(self) -> UploadBilibiliTaskOutput:
         exists = Path(self.input.path).exists()
         if exists:
-            event = Event(self.input.event_json)
-            config = BiliupConfig(event)
-
             self.biliup.renew()
-            self.biliup.upload(self.input.path, *config.to_command_args())
+            self.biliup.upload(self.input.path, *self.config.to_command_args())
 
         return UploadBilibiliTaskOutput(path=self.input.path, skipped=not exists)

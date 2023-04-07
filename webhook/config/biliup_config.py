@@ -9,7 +9,7 @@ import yaml
 from boltons.iterutils import first
 
 from ..event import Event
-from ..util import DictionaryConvertible, filter_suffixes
+from ..util import DictionaryConvertible
 
 BILIUP_CONFIG_DIR = Path("/etc/biliup").resolve(strict=True)
 
@@ -42,13 +42,11 @@ class BiliupConfig(DictionaryConvertible):
     no_reprint: Optional[int] = field(init=False)
     open_elec: Optional[int] = field(init=False)
     event: InitVar[Event]
+    config_path: InitVar[Path]
 
-    def __post_init__(self, event: Event):
-        config = dict()
-        config_path = first(filter_suffixes(BILIUP_CONFIG_DIR.glob("config.*"), ".yml", ".yaml"))
-        if config_path is not None:
-            with open(config_path) as f:
-                config = yaml.safe_load(f)
+    def __post_init__(self, event: Event, config_path: Path):
+        with open(config_path) as f:
+            config = yaml.safe_load(f)
 
         event_date = event.get_date()
         event_title = event.get_title()
