@@ -5,13 +5,13 @@ FROM gcc AS build-c
 WORKDIR /build
 
 FROM build-go AS aliyunpan-build
-ENV ALIYUNPAN_VERSION 0.2.6
+ENV ALIYUNPAN_VERSION 0.2.7
 RUN wget https://github.com/tickstep/aliyunpan/archive/refs/tags/v${ALIYUNPAN_VERSION}.tar.gz -O aliyunpan.tar.gz && \
     tar -xzf aliyunpan.tar.gz --strip 1 && \
     go build -o /aliyunpan
 
 FROM build-go AS baidupcs-build
-ENV BAIDUPCS_VERSION 3.9.0
+ENV BAIDUPCS_VERSION 3.9.1
 RUN wget https://github.com/qjfoidnh/BaiduPCS-Go/archive/refs/tags/v${BAIDUPCS_VERSION}.tar.gz -O baidupcs.tar.gz && \
     tar -xzf baidupcs.tar.gz --strip 1 && \
     go build -o /baidupcs
