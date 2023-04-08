@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Optional, Callable, Iterator
 
-from boltons.iterutils import first
 from celery.canvas import chain, chord, group, Signature
 
 from ..config import Config, BILIUP_CONFIG_DIR
@@ -145,7 +144,10 @@ class Composer:
         return burn_danmaku.si(input.to_dict())
 
     def get_upload_bilibili_signature(self, path: Path) -> Optional[Signature]:
-        config_path = first(filter_suffixes(BILIUP_CONFIG_DIR.glob("config.*"), ".yml", ".yaml"))
+        try:
+            config_path = next(filter_suffixes(BILIUP_CONFIG_DIR.glob("config.*"), ".yml", ".yaml"))
+        except StopIteration:
+            return
         if not config_path.exists():
             return
 
