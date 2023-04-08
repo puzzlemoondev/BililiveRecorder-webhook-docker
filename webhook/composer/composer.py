@@ -148,8 +148,6 @@ class Composer:
             config_path = next(filter_suffixes(BILIUP_CONFIG_DIR.glob("config.*"), ".yml", ".yaml"))
         except StopIteration:
             return
-        if not config_path.exists():
-            return
 
         input = UploadBilibiliTaskInput(
             event_json=self.event.data,
