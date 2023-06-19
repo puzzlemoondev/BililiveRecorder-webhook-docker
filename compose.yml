@@ -10,8 +10,8 @@ services:
       - ./biliup:/etc/biliup
       - ./DanmakuFactory:/etc/DanmakuFactory
     environment:
-      - RECORDER_USER
-      - RECORDER_PASS
+      - BREC_HTTP_BASIC_USER=${RECORDER_USER}
+      - BREC_HTTP_BASIC_PASS=${RECORDER_PASS}
       - BAIDUPCS_BDUSS
       - BAIDUPCS_STOKEN
       - BAIDUPCS_MAX_UPLOAD_PARALLEL
