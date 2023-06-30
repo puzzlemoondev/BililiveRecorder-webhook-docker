@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional, Callable, Iterator
+from typing import Optional, Callable, Iterable
 
 from celery.canvas import chain, chord, group, Signature
 
@@ -122,7 +122,7 @@ class Composer:
 
     def get_signature(
         self,
-        signatures_builder: Callable[[Path], Iterator[Optional[Signature]]],
+        signatures_builder: Callable[[Path], Iterable[Optional[Signature]]],
         path: Path,
         remove_after: bool,
     ) -> Signature:
@@ -158,13 +158,17 @@ class Composer:
 
     def get_upload_aliyunpan_signature(self, path: Path) -> Optional[Signature]:
         if rtoken := self.config.aliyunpan_rtoken:
-            input = UploadAliyunpanTaskInput(rtoken=rtoken, path=str(path))
+            input = UploadAliyunpanTaskInput(path=str(path), remote_dir=self.config.aliyunpan_upload_dir, rtoken=rtoken)
             return upload_aliyunpan.si(input.to_dict())
 
     def get_upload_baidupcs_signature(self, path: Path) -> Optional[Signature]:
         if (bduss := self.config.baidupcs_bduss) and (stoken := self.config.baidupcs_stoken):
             input = UploadBaidupcsTaskInput(
-                path=str(path), bduss=bduss, stoken=stoken, max_upload_parallel=self.config.baidupcs_max_upload_parallel
+                path=str(path),
+                remote_dir=self.config.baidupcs_upload_dir,
+                bduss=bduss,
+                stoken=stoken,
+                max_upload_parallel=self.config.baidupcs_max_upload_parallel,
             )
             return upload_baidupcs.si(input.to_dict())
 
