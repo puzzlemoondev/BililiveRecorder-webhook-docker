@@ -35,6 +35,7 @@ after upload success.
   same time triggers upload to both platform concurrently.
   - RECORDER_USER: username for BiliveRecorder
   - RECORDER_PASS: password for BiliveRecorder
+  - BAIDUPCS_UPLOAD_DIR: baidupcs folder to upload files into
   - BAIDUPCS_BDUSS: bduss for baidupcs login.
     See [baidupcs](https://github.com/qjfoidnh/BaiduPCS-Go#%E7%99%BB%E5%BD%95%E7%99%BE%E5%BA%A6%E5%B8%90%E5%8F%B7) for
     how to retrieve.
@@ -42,6 +43,7 @@ after upload success.
     See [baidupcs](https://github.com/qjfoidnh/BaiduPCS-Go#%E7%99%BB%E5%BD%95%E7%99%BE%E5%BA%A6%E5%B8%90%E5%8F%B7) for
     how to retrieve.
   - BAIDUPCS_MAX_UPLOAD_PARALLEL: parallel upload setting for SVIP user. Max 100.
+  - ALIYUNPAN_UPLOAD_DIR: aliyunpan folder to upload files into
   - ALIYUNPAN_RTOKEN: refresh token for aliyunpan login.
     See [aliyunpan](https://github.com/tickstep/aliyunpan#%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96RefreshToken) for how to
     retrieve.

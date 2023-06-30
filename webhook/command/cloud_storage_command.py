@@ -1,12 +1,15 @@
 from pathlib import Path
+from typing import Optional
 
 from .command import Command
 from ..util.string_utils import count_lines
 
+REMOTE_ROOT = "/"
+
 
 class CloudStorageCommand(Command):
-    def upload(self, local_path: str, remote_dir: str) -> str:
-        return self("upload", local_path, remote_dir)
+    def upload(self, local_path: str, remote_dir: Optional[str]) -> str:
+        return self("upload", local_path, remote_dir or REMOTE_ROOT)
 
     def login(self, *args) -> str:
         return self("login", *args)
@@ -21,10 +24,12 @@ class CloudStorageCommand(Command):
         if not self.has_account():
             self.login()
 
-    def upload_and_verify(self, local_path: str):
+    def upload_and_verify(self, local_path: str, remote_dir: Optional[str]):
         resolved_path = Path(local_path).resolve()
         local_path = str(resolved_path)
-        remote_dir = f"/{resolved_path.parent.name}"
+
+        if remote_dir:
+            remote_dir = str(Path(REMOTE_ROOT).joinpath(remote_dir))
 
         self.upload(local_path, remote_dir)
 

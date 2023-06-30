@@ -9,9 +9,10 @@ from ..command import BaidupcsCommand
 @dataclass
 class UploadBaidupcsTaskInput(Input):
     path: str
+    remote_dir: Optional[str]
     bduss: str
     stoken: str
-    max_upload_parallel: Optional[str]
+    max_upload_parallel: Optional[int]
 
 
 @dataclass
@@ -30,6 +31,6 @@ class UploadBaidupcsTask(Task[UploadBaidupcsTaskInput, UploadBaidupcsTaskOutput]
         exists = Path(self.input.path).exists()
         if exists:
             self.baidupcs.login_if_needed()
-            self.baidupcs.upload_and_verify(self.input.path)
+            self.baidupcs.upload_and_verify(self.input.path, self.input.remote_dir)
 
         return UploadBaidupcsTaskOutput(path=self.input.path, skipped=not exists)
