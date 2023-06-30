@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
 from .task import Task, Input, Output
 from ..command import AliyunpanCommand
@@ -8,6 +9,7 @@ from ..command import AliyunpanCommand
 @dataclass
 class UploadAliyunpanTaskInput(Input):
     path: str
+    remote_dir: Optional[str]
     rtoken: str
 
 
@@ -25,6 +27,6 @@ class UploadAliyunpanTask(Task[UploadAliyunpanTaskInput, UploadAliyunpanTaskOutp
         exists = Path(self.input.path).exists()
         if exists:
             self.aliyunpan.login_if_needed()
-            self.aliyunpan.upload_and_verify(self.input.path)
+            self.aliyunpan.upload_and_verify(self.input.path, self.input.remote_dir)
 
         return UploadAliyunpanTaskOutput(path=self.input.path, skipped=not exists)
