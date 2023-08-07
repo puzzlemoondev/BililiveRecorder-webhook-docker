@@ -17,7 +17,7 @@ RUN wget https://github.com/qjfoidnh/BaiduPCS-Go/archive/refs/tags/v${BAIDUPCS_V
     go build -o /baidupcs
 
 FROM build-c AS danmaku-factory-build
-ENV DANMAKU_FACTORY_VERSION 1.63
+ENV DANMAKU_FACTORY_VERSION 1.70
 RUN wget https://github.com/hihkm/DanmakuFactory/archive/refs/tags/v${DANMAKU_FACTORY_VERSION}.tar.gz -O DanmakuFactory.tar.gz && \
     tar -xzf DanmakuFactory.tar.gz --strip 1 && \
     make && \
