@@ -30,7 +30,7 @@ after upload success.
 
 > ⚠️ DO NOT TURN BURN_DANMAKU ON if your machine is low on resource.
 
-- Add a [`.env` file](https://docs.docker.com/compose/environment-variables/#the-env-file) with these variables. For
+- Add a [`.env` file](https://docs.docker.com/compose/environment-variables/#the-env-file) with these variables. Note that every variable is optional. For
   baidupcs, provide both bduss and stoken. For aliyunpan, provide rtoken. Providing credentials for both platform at the
   same time triggers upload to both platform concurrently.
   - RECORDER_USER: username for BiliveRecorder
@@ -50,7 +50,7 @@ after upload success.
   - BURN_DANMAKU: pass 1 to turn danmaku burning on. This creates a separate video file with hardcoded danmaku.
   - BILIBILI_UPLOAD_BURNED: pass 1 to upload video with danmaku instead of the original.
   - REMOVE_LOCAL: pass 1 to remove local files after upload.
-- Run `docker compose up`
+- Run `make up`. When updating, run `make update`.
 - Add webhook to settings
   - Go to Settings -> Webhook -> Webhook V2
   - Add this line: `http://localhost:9000/hooks/recorder-file-closed`
@@ -142,8 +142,20 @@ This is the default config file from https://github.com/hihkm/DanmakuFactory
 
 ## Monitoring
 
-- We use [`flower`](https://github.com/mher/flower) to monitor task queues. Open `localhost:5555` to see the panel.
+- We use [`flower`](https://github.com/mher/flower) to monitor task queues. Open `localhost:5555/flower/` to see the panel.
 - For supervisor, open `localhost:9001`.
+
+## HTTPS Reverse Proxy
+
+You can choose to setup a `caddy` reverse proxy with https authentication by using the `compose.proxy.yml` file. There are some further preparations you need to do:
+
+- Put `RECORDER_ADDRESS` variable into `.env`, it defaults to `localhost` if you don't. If you have an A record in your DNS records you should use that instead.
+- Stop any running services.
+- Run `make proxy-up`. When updating, run `make proxy-update`.
+
+Now your recorder instance should be behind https at your `RECORDER_ADDRESS`. To access `flower`, visit `/flower`. To access `supervisor`, visit `/supervisor`. Note that supervisor does not support reverse proxy so expect some weird behavior.
+
+Read `caddy`'s documentation on automatic https to see how it works: https://caddyserver.com/docs/automatic-https
 
 ## Dependencies
 
@@ -153,4 +165,5 @@ This is the default config file from https://github.com/hihkm/DanmakuFactory
 - [aliyunpan](https://github.com/tickstep/aliyunpan)
 - [biliup-rs](https://github.com/ForgQi/biliup-rs)
 - [DanmakuFactory](https://github.com/hihkm/DanmakuFactory)
+- [caddy](https://github.com/caddyserver/caddy)
 - ffmpeg

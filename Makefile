@@ -4,12 +4,24 @@ up:
 	docker compose up --build --detach
 exec:
 	docker compose exec webhook sh
+logs:
+	docker compose logs --follow
 down:
 	docker compose down
 reup: down up
 update:
-	chmod +x update.sh
 	./update.sh
+
+proxy-up:
+	docker compose -f compose.proxy.yml up --build --detach
+proxy-logs:
+	docker compose -f compose.proxy.yml logs --follow
+proxy-down:
+	docker compose -f compose.proxy.yml down
+proxy-reup: proxy-down proxy-up
+proxy-update:
+	./update.sh --proxy
+
 local:
 	sd 'latest|edge' local compose.yml
 latest:
