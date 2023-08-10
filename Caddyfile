@@ -1,0 +1,15 @@
+{$ADDRESS} {
+	redir /flower /flower/
+	handle /flower/* {
+		reverse_proxy {$WEBHOOK_HOST}:5555
+	}
+
+	redir /supervisor /supervisor/
+	handle_path /supervisor/* {
+		reverse_proxy {$WEBHOOK_HOST}:9001
+	}
+
+	handle {
+		reverse_proxy {$WEBHOOK_HOST}:2356
+	}
+}

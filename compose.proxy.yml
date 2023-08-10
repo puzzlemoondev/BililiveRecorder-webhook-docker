@@ -1,0 +1,22 @@
+services:
+  webhook:
+    extends:
+      file: compose.yml
+      service: webhook
+    ports: []
+  proxy:
+    image: caddy:alpine
+    depends_on:
+      - webhook
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy_config:/config
+      - ./caddy_data:/data
+    environment:
+      ADDRESS: ${RECORDER_ADDRESS:-localhost}
+      WEBHOOK_HOST: webhook
+    restart: always

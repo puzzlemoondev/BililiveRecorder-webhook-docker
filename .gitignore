@@ -293,3 +293,5 @@ poetry.toml
 # End of https://www.toptal.com/developers/gitignore/api/macos,intellij+all,python
 
 .env
+caddy_config/
+caddy_data/
