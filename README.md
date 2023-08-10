@@ -5,8 +5,8 @@
 [![Docker Image Version (latest semver)](https://img.shields.io/docker/v/puzzlemoondev/bililive-recorder-webhook?sort=semver)](https://hub.docker.com/r/puzzlemoondev/bililive-recorder-webhook)
 [![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/puzzlemoondev/bililive-recorder-webhook?sort=semver)](https://hub.docker.com/r/puzzlemoondev/bililive-recorder-webhook)
 
-Dockerized [BililiveRecorder](https://github.com/BililiveRecorder/BililiveRecorder) with biliup, DanmakuFactory,
-baidupcs and aliyunpan upload webhook.
+Dockerized [BililiveRecorder](https://github.com/BililiveRecorder/BililiveRecorder) with `biliup`, `DanmakuFactory`,
+`baidupcs` and `aliyunpan` upload webhook with [caddy](https://github.com/caddyserver/caddy) reverse proxy support for automated HTTPS.
 
 The [webhook](https://github.com/adnanh/webhook) server listens for `FileClosed` events, uploads files, and removes them
 after upload success.
@@ -18,6 +18,7 @@ after upload success.
 - Parallelism (`celery` task queue)
 - Lightweight enough to run on t2.micro
 - Real time service & task monitoring and management (using `supervisor` & `flower`)
+- Automated HTTPS (using `caddy`)
 
 ## Why not
 
@@ -35,6 +36,7 @@ after upload success.
   same time triggers upload to both platform concurrently.
   - RECORDER_USER: username for BiliveRecorder
   - RECORDER_PASS: password for BiliveRecorder
+  - RECORDER_ADDRESS: needed if you want to use reverse proxy. defaults to `localhost`. If you have an A record in your DNS records you should use that instead.
   - BAIDUPCS_UPLOAD_DIR: baidupcs folder to upload files into
   - BAIDUPCS_BDUSS: bduss for baidupcs login.
     See [baidupcs](https://github.com/qjfoidnh/BaiduPCS-Go#%E7%99%BB%E5%BD%95%E7%99%BE%E5%BA%A6%E5%B8%90%E5%8F%B7) for
@@ -50,10 +52,26 @@ after upload success.
   - BURN_DANMAKU: pass 1 to turn danmaku burning on. This creates a separate video file with hardcoded danmaku.
   - BILIBILI_UPLOAD_BURNED: pass 1 to upload video with danmaku instead of the original.
   - REMOVE_LOCAL: pass 1 to remove local files after upload.
-- Run `make up`. When updating, run `make update`.
+
+```bash
+# without reverse proxy
+make up
+# with reverse proxy
+make proxy-up
+```
+
 - Add webhook to settings
   - Go to Settings -> Webhook -> Webhook V2
   - Add this line: `http://localhost:9000/hooks/recorder-file-closed`
+
+## How to Update
+
+```bash
+# without reverse proxy
+make update
+# with reverse proxy
+make proxy-update
+```
 
 ## Biliup Integration
 
@@ -142,20 +160,8 @@ This is the default config file from https://github.com/hihkm/DanmakuFactory
 
 ## Monitoring
 
-- We use [`flower`](https://github.com/mher/flower) to monitor task queues. Open `localhost:5555/flower/` to see the panel.
-- For supervisor, open `localhost:9001`.
-
-## HTTPS Reverse Proxy
-
-You can choose to setup a `caddy` reverse proxy with https authentication by using the `compose.proxy.yml` file. There are some further preparations you need to do:
-
-- Put `RECORDER_ADDRESS` variable into `.env`, it defaults to `localhost` if you don't. If you have an A record in your DNS records you should use that instead.
-- Stop any running services.
-- Run `make proxy-up`. When updating, run `make proxy-update`.
-
-Now your recorder instance should be behind https at your `RECORDER_ADDRESS`. To access `flower`, visit `/flower`. To access `supervisor`, visit `/supervisor`. Note that supervisor does not support reverse proxy so expect some weird behavior.
-
-Read `caddy`'s documentation on automatic https to see how it works: https://caddyserver.com/docs/automatic-https
+- We use [`flower`](https://github.com/mher/flower) to monitor task queues. Visit `http://[RECORDER_ADDRESS]:5555/flower` (or `https://[RECORDER_ADDRESS]/flower` for reverse proxy) to see the panel.
+- For supervisor, visit `http://[RECORDER_ADDRESS]:9001` (or `https://[RECORDER_ADDRESS]/supervisor` for reverse proxy). Note that supervisor does not fully support reverse proxy so expect some weird behavior under reverse proxy.
 
 ## Dependencies
 
