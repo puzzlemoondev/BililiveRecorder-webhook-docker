@@ -19,7 +19,7 @@ class Config:
         self.baidupcs_upload_dir = self.get_str_env("BAIDUPCS_UPLOAD_DIR")
         self.baidupcs_bduss = self.get_str_env("BAIDUPCS_BDUSS")
         self.baidupcs_stoken = self.get_str_env("BAIDUPCS_STOKEN")
-        self.baidupcs_max_upload_parallel = self.get_int_env(os.environ.get("BAIDUPCS_MAX_UPLOAD_PARALLEL"))
+        self.baidupcs_max_upload_parallel = self.get_int_env("BAIDUPCS_MAX_UPLOAD_PARALLEL")
         self.aliyunpan_upload_dir = self.get_str_env("ALIYUNPAN_UPLOAD_DIR")
         self.aliyunpan_rtoken = self.get_str_env("ALIYUNPAN_RTOKEN")
         self.burn_danmaku = self.get_boolean_flag_env("BURN_DANMAKU")
