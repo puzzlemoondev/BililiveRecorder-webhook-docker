@@ -123,6 +123,6 @@ tzdata==2023.3 ; python_version >= "3.11" and python_version < "4.0" \
 vine==5.0.0 ; python_version >= "3.11" and python_version < "4.0" \
     --hash=sha256:4c9dceab6f76ed92105027c49c823800dd33cacce13bdedc5b914e3514b7fb30 \
     --hash=sha256:7d3b1624a953da82ef63462013bbd271d3eb75751489f9807598e8f340bd637e
-wcwidth==0.2.6 ; python_version >= "3.11" and python_version < "4.0" \
-    --hash=sha256:795b138f6875577cd91bba52baf9e445cd5118fd32723b460e30a0af30ea230e \
-    --hash=sha256:a5220780a404dbe3353789870978e472cfe477761f06ee55077256e509b156d0
+wcwidth==0.2.8 ; python_version >= "3.11" and python_version < "4.0" \
+    --hash=sha256:77f719e01648ed600dfa5402c347481c0992263b81a027344f3e1ba25493a704 \
+    --hash=sha256:8705c569999ffbb4f6a87c6d1b80f324bd6db952f5eb0b95bc07517f4c1813d4
