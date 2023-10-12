@@ -30,7 +30,7 @@ class Composer:
     def __call__(self) -> Signature:
         files = self.event.get_event_files()
 
-        if burn_danmaku_signature := self.get_burn_danmaku_signature():
+        if burn_danmaku_signature := self.get_burn_danmaku_signature(files):
             burn_danmaku_signature = self.get_burn_danmaku_remove_on_error_signature(files, burn_danmaku_signature)
             if self.config.bilibili_upload_burned:
                 return self.get_burn_danmaku_upload_bilibili_upload_cloud_signature(files, burn_danmaku_signature)
@@ -134,8 +134,8 @@ class Composer:
     def get_batch_remove_signature(self, *paths: Path) -> Signature:
         return group(compact(map(self.get_remove_signature, paths)))
 
-    def get_burn_danmaku_signature(self) -> Optional[Signature]:
-        if not self.config.burn_danmaku:
+    def get_burn_danmaku_signature(self, files: EventFiles) -> Optional[Signature]:
+        if not self.config.burn_danmaku or files.is_danmaku_empty():
             return
 
         input = BurnDanmakuTaskInput(
