@@ -23,7 +23,4 @@ services:
       - DANMAKU_FACTORY_ARGS
       - BILIBILI_UPLOAD_BURNED
       - REMOVE_LOCAL
-      - FLOWER_PERSISTENT=True
-      - FLOWER_STATE_SAVE_INTERVAL=10000
-      - FLOWER_DB=/etc/flower/flower.db
     restart: always
