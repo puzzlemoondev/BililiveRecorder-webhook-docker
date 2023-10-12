@@ -5,7 +5,7 @@ FROM gcc AS build-c
 WORKDIR /build
 
 FROM build-go AS aliyunpan-build
-ENV ALIYUNPAN_VERSION 0.2.7
+ENV ALIYUNPAN_VERSION 0.2.8
 RUN wget https://github.com/tickstep/aliyunpan/archive/refs/tags/v${ALIYUNPAN_VERSION}.tar.gz -O aliyunpan.tar.gz && \
     tar -xzf aliyunpan.tar.gz --strip 1 && \
     go build -o /aliyunpan
@@ -37,7 +37,7 @@ ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone
 WORKDIR /recorder
-COPY --from=bililive/recorder:2.9.1 /app .
+COPY --from=bililive/recorder:2.10.0 /app .
 EXPOSE 2356
 
 FROM recorder as webhook
