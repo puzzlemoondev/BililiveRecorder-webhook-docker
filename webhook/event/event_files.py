@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import Path
+from xml.etree import ElementTree
 
 from boltons.setutils import IndexedSet
 
@@ -30,3 +31,8 @@ class EventFiles(DictionaryConvertible):
 
     def get_burn_dependencies(self) -> IndexedSet[Path]:
         return IndexedSet([self.data, self.danmaku])
+
+    def is_danmaku_empty(self) -> bool:
+        tree = ElementTree.parse(self.danmaku)
+        root = tree.getroot()
+        return not len(root.findall("d"))
