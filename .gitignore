@@ -295,3 +295,6 @@ poetry.toml
 .env
 caddy_config/
 caddy_data/
+flower_data/
+redis_config/
+redis_data/

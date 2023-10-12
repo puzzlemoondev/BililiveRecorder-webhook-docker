@@ -9,6 +9,9 @@ services:
       - ./rec:/rec
       - ./biliup:/etc/biliup
       - ./DanmakuFactory:/etc/DanmakuFactory
+      - ./redis_config:/var/lib/redis
+      - ./redis_data:/var/redis
+      - ./flower_data:/etc/flower
     environment:
       - BREC_HTTP_BASIC_USER=${RECORDER_USER}
       - BREC_HTTP_BASIC_PASS=${RECORDER_PASS}
@@ -20,4 +23,7 @@ services:
       - DANMAKU_FACTORY_ARGS
       - BILIBILI_UPLOAD_BURNED
       - REMOVE_LOCAL
+      - FLOWER_PERSISTENT=True
+      - FLOWER_STATE_SAVE_INTERVAL=10000
+      - FLOWER_DB=/etc/flower/flower.db
     restart: always
