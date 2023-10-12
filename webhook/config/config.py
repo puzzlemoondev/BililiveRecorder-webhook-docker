@@ -33,7 +33,9 @@ class Config:
 
     @staticmethod
     def get_boolean_flag_env(key: str) -> bool:
-        return os.environ.get(key, "0") != "0"
+        if value := os.environ.get(key):
+            return value != "0"
+        return False
 
     @staticmethod
     def get_int_env(key: str) -> Optional[int]:
