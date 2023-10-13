@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from .task import Task, Input, Output
+from .base import Task, Input, Output
 from ..command import BiliupCommand
 from ..config import BiliupConfig
 from ..event import Event
