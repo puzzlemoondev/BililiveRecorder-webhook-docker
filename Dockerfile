@@ -37,7 +37,7 @@ ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone
 WORKDIR /recorder
-COPY --from=bililive/recorder:2.10.0 /app .
+COPY --from=bililive/recorder:2.10.1 /app .
 EXPOSE 2356
 
 FROM recorder as webhook
