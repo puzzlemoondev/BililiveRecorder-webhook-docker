@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from .task import Task, Input, Output
+from .base import Task, Input, Output
 from ..command import DanmakuFactoryCommand, FFMPEGCommand
 from ..event import Event
 

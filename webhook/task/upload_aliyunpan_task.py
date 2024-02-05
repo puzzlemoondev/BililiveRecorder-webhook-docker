@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-from .task import Task, Input, Output
+from .base import Task, Input, Output
 from ..command import AliyunpanCommand
 
 

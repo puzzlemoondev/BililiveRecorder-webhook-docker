@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TypeVar, Generic
 
-from ..util import DictionaryConvertible
+from ...util import DictionaryConvertible
 
 
 @dataclass
