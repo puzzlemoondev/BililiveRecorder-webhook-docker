@@ -11,7 +11,7 @@ RUN wget https://github.com/tickstep/aliyunpan/archive/refs/tags/v${ALIYUNPAN_VE
     go build -o /aliyunpan
 
 FROM build-go AS baidupcs-build
-ENV BAIDUPCS_VERSION 3.9.5
+ENV BAIDUPCS_VERSION 3.9.4
 RUN wget https://github.com/qjfoidnh/BaiduPCS-Go/archive/refs/tags/v${BAIDUPCS_VERSION}.tar.gz -O baidupcs.tar.gz && \
     tar -xzf baidupcs.tar.gz --strip 1 && \
     go build -o /baidupcs
